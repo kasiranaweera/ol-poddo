@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import Logo from './Logo'
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear()
@@ -10,15 +11,8 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div className="md:col-span-1">
-            <Link to="/" className={`flex items-center gap-4 font-bold text-xl`}>
-          <div className="w-40 h-32 bg-amber-500 rounded-xl flex items-center justify-center text-white font-bold text-8xl">
-            OL
-          </div>
-          <span className="hidden sm:inline text-amber-500 font-bold text-8xl" style={{ fontFamily: '"Gemunu Libre", sans-serif', fontWeight: 800 }}>
-            පොඩ්ඩෝ
-          </span>
-        </Link>
-            <p className="text-sm text-muted-foreground">
+            <Logo />
+            <p className="text-sm text-muted-foreground mt-3">
               Modern web application with cutting-edge technologies
             </p>
           </div>

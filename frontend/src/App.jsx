@@ -6,6 +6,7 @@ import { LanguageProvider } from './context/LanguageContext'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import { Home } from './pages/Home'
+import { Resources } from './pages/Resources'
 import { About } from './pages/About'
 import { Demo } from './pages/Demo'
 import { NotFound } from './pages/NotFound'
@@ -18,6 +19,7 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/resources" element={<Resources />} />
           <Route path="/demo" element={<Demo />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
