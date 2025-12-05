@@ -9,6 +9,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { Button } from "./common/Button";
 import { cn } from "../utils/cn";
 import Logo from "./Logo";
+import Knowingz from "../assets/knowingz.png";
 
 export const Header = () => {
   const { isDark, toggleTheme } = useTheme();
@@ -82,7 +83,10 @@ export const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Logo />
+        <div className="flex gap-4">
+        <img src={Knowingz} alt="Knowingz Logo" className="h-8 w-auto" />
+        <div className="border-x-2 border-black"/>
+        <Logo /></div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">

@@ -13,8 +13,7 @@ export const Footer = () => {
           <div className="md:col-span-1">
             <Logo />
             <p className="text-sm text-muted-foreground mt-3">
-              Modern web application with cutting-edge technologies
-            </p>
+This platform is dedicated to providing free, quality educational resources to all O/L students in Sri Lanka. We believe every student deserves equal access to learning materials regardless of their location or economic background.            </p>
           </div>
 
           {/* Product */}
@@ -28,12 +27,17 @@ export const Footer = () => {
               </li>
               <li>
                 <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
-                  About
+                  About Us
                 </Link>
               </li>
               <li>
-                <Link to="/demo" className="text-muted-foreground hover:text-primary transition-colors">
-                  Demo
+                <Link to="/resources" className="text-muted-foreground hover:text-primary transition-colors">
+                  Resources
+                </Link>
+              </li>
+               <li>
+                <Link to="/donate" className="text-muted-foreground hover:text-primary transition-colors">
+                  Donate
                 </Link>
               </li>
             </ul>
@@ -41,25 +45,31 @@ export const Footer = () => {
 
           {/* Resources */}
           <div>
-            <h3 className="font-semibold mb-4">Resources</h3>
+            <h3 className="font-semibold mb-4">Subjects</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  Documentation
+                  Mathematics
                 </a>
               </li>
               <li>
                 <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  GitHub
+                  Science
                 </a>
               </li>
               <li>
                 <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  Support
+                  Sinhala
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                  All Subjects
                 </a>
               </li>
             </ul>
           </div>
+          
 
           {/* Legal */}
           <div>
@@ -86,9 +96,9 @@ export const Footer = () => {
 
         {/* Divider */}
         <div className="border-t border-border/40 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>&copy; {currentYear} OL-Poddo. All rights reserved.</p>
-            <p>Built with Vite + React + Tailwind CSS + React Router</p>
+          <div className="flex flex-col justify-between items-center text-sm text-muted-foreground">
+            <p>&copy; {currentYear} &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; OL-Poddo &nbsp;&nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;All rights reserved.</p>
+            <p>Powered by Knowingz</p>
           </div>
         </div>
       </div>
