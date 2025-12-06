@@ -208,7 +208,7 @@ async def upload_paper(
     subject_id: int = Form(...),
     paper_type: str = Form(default="other"),
     exam_year: Optional[int] = Form(None),
-    is_public: bool = Form(default=False),
+    is_public: bool = Form(default=True),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -565,7 +565,7 @@ async def upload_study_notes(
     grade_id: int = Form(...),
     subject_id: int = Form(...),
     lesson: Optional[str] = Form(None),
-    is_public: bool = Form(default=False),
+    is_public: bool = Form(default=True),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

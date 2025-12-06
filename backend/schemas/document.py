@@ -84,6 +84,7 @@ class PaperListResponse(BaseModel):
     """Schema for paper list response"""
     id: int
     title: str
+    description: Optional[str]
     paper_type: str
     exam_year: Optional[int]
     grade_id: int
@@ -91,6 +92,7 @@ class PaperListResponse(BaseModel):
     owner_id: int
     is_public: bool
     created_at: datetime
+    google_drive_url: Optional[str]
     
     class Config:
         from_attributes = True
@@ -128,11 +130,13 @@ class TextbookListResponse(BaseModel):
     """Schema for textbook list response"""
     id: int
     title: str
+    description: Optional[str]
     part: Optional[str]
     grade_id: int
     subject_id: int
     is_public: bool
     created_at: datetime
+    google_drive_url: Optional[str]
     
     class Config:
         from_attributes = True
@@ -171,12 +175,14 @@ class StudyNoteListResponse(BaseModel):
     """Schema for study note list response"""
     id: int
     title: str
+    description: Optional[str]
     lesson: Optional[str]
     grade_id: int
     subject_id: int
     owner_id: int
     is_public: bool
     created_at: datetime
+    google_drive_url: Optional[str]
     
     class Config:
         from_attributes = True

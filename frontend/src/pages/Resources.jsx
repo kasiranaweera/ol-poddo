@@ -46,7 +46,7 @@ export const Resources = () => {
   const loadGrades = async () => {
     try {
       const response = await gradeAPI.getAll()
-      setGrades(response.data || [])
+      setGrades(response || [])
     } catch (err) {
       setError('Failed to load grades')
       console.error(err)
@@ -56,7 +56,7 @@ export const Resources = () => {
   const loadSubjects = async (gradeId) => {
     try {
       const response = await gradeAPI.getSubjects(gradeId)
-      setSubjects(response.data || [])
+      setSubjects(response || [])
     } catch (err) {
       console.error(err)
     }
@@ -70,7 +70,7 @@ export const Resources = () => {
         selectedSubject || null,
         selectedPaperType || null
       )
-      setPapers(response.data || [])
+      setPapers(response || [])
     } catch (err) {
       setError('Failed to load papers')
       console.error(err)
@@ -86,7 +86,7 @@ export const Resources = () => {
         selectedGrade || null,
         selectedSubject || null
       )
-      setTextbooks(response.data || [])
+      setTextbooks(response || [])
     } catch (err) {
       setError('Failed to load textbooks')
       console.error(err)
@@ -102,7 +102,7 @@ export const Resources = () => {
         selectedGrade || null,
         selectedSubject || null
       )
-      setNotes(response.data || [])
+      setNotes(response || [])
     } catch (err) {
       setError('Failed to load notes')
       console.error(err)
@@ -130,6 +130,8 @@ export const Resources = () => {
     { value: 'model_paper', label: '⭐ Model Papers' },
     { value: 'other', label: '📄 Other' },
   ]
+
+  console.log({ papers, textbooks, notes })
 
   const DocumentCard = ({ item, type }) => (
     <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow">
