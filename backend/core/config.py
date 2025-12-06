@@ -1,0 +1,46 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+load_dotenv(env_path)
+
+class Settings:
+    """Application settings"""
+    
+    # App settings
+    app_name: str = "OL-Poddo API"
+    environment: str = os.getenv("ENVIRONMENT", "development")
+    debug: bool = environment == "development"
+    
+    # Database settings
+    db_path: str = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ol_poddo.db")
+    database_url: str = f"sqlite:///{db_path}"
+    
+    # Security settings
+    secret_key: str = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
+    
+    # CORS settings
+    cors_origins: list = [
+        "http://localhost",
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+    ]
+    
+    # Email settings (for future use)
+    smtp_server: str = os.getenv("SMTP_SERVER", "")
+    smtp_port: int = int(os.getenv("SMTP_PORT", 587))
+    smtp_user: str = os.getenv("SMTP_USER", "")
+    smtp_password: str = os.getenv("SMTP_PASSWORD", "")
+
+
+# Create settings instance
+settings = Settings()
+
