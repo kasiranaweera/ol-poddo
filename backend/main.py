@@ -5,13 +5,15 @@ from fastapi.responses import JSONResponse
 
 from .core.config import settings
 from .core.database import engine, Base
-from .routes import auth, users, resources, notes, forum, questions, materials
+from .routes import auth, users, resources, notes, forum, questions, documents
 from .models.user import User
 from .models.resource import Resource, ResourceCategory
 from .models.note import Note, StudyMaterial
 from .models.forum import ForumPost, ForumComment
 from .models.question import Question, Answer
 from .models.token import VerificationToken, PasswordResetToken
+from .models.grade import Grade, Subject
+from .models.document import Paper, Textbook, StudyNote
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -62,7 +64,7 @@ app.include_router(resources.router)
 app.include_router(notes.router)
 app.include_router(forum.router)
 app.include_router(questions.router)
-app.include_router(materials.router)
+app.include_router(documents.router)
 
 
 # Root endpoint
@@ -82,7 +84,7 @@ def root():
             "notes": "/api/notes",
             "forum": "/api/forum",
             "questions": "/api/questions",
-            "materials": "/api/materials"
+            "documents": "/api/documents"
         }
     }
 

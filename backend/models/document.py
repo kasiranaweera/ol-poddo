@@ -5,51 +5,93 @@ from enum import Enum as PyEnum
 from ..core.database import Base
 
 
-class DocumentType(str, PyEnum):
-    """Enum for document types"""
-    PDF = "pdf"
-    DOC = "doc"
-    DOCX = "docx"
-    TXT = "txt"
-    IMAGE = "image"
-    EQUATION = "equation"
+class PaperType(str, PyEnum):
+    """Enum for paper types"""
+    PAST_PAPER = "past_paper"
+    PROVISIONAL_PAPER = "provisional_paper"
+    SCHOOL_PAPER = "school_paper"
+    MODEL_PAPER = "model_paper"
+    OTHER = "other"
 
 
-class Document(Base):
-    """Document database model"""
-    __tablename__ = "documents"
+class Paper(Base):
+    """Paper document model (Past papers, Provisional papers, School papers, Model papers, etc.)"""
+    __tablename__ = "papers"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    grade_id = Column(Integer, ForeignKey("grades.id"), nullable=False, index=True)
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False, index=True)
+    
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
-    filename = Column(String(255), nullable=False, unique=True)
-    file_path = Column(String(500), nullable=False)
-    file_type = Column(String(50), nullable=False)
-    file_size = Column(Float, nullable=False)  # Size in bytes
-    mime_type = Column(String(100), nullable=False)
-    document_type = Column(Enum(DocumentType), default=DocumentType.DOC)
-    uploaded_at = Column(DateTime, default=datetime.utcnow, index=True)
+    paper_type = Column(Enum(PaperType), nullable=False, index=True)
+    exam_year = Column(Integer, nullable=True)  # e.g., 2023, 2024
+    google_drive_id = Column(String(255), nullable=False)  # Google Drive file ID
+    google_drive_url = Column(String(500), nullable=True)  # Shareable Google Drive URL
+    
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_public = Column(Boolean, default=False)
     
     # Relationships
-    user = relationship("User", back_populates="documents")
+    owner = relationship("User", foreign_keys=[owner_id], back_populates="papers")
+    grade = relationship("Grade", back_populates="papers")
+    subject = relationship("Subject", back_populates="papers")
     
     def __repr__(self):
-        return f"<Document(id={self.id}, title={self.title}, user_id={self.user_id})>"
+        return f"<Paper(id={self.id}, title={self.title}, paper_type={self.paper_type})>"
 
 
-class Page(Base):
-    """Page/Chapter in a document"""
-    __tablename__ = "document_pages"
+class Textbook(Base):
+    """Textbook document model"""
+    __tablename__ = "textbooks"
     
     id = Column(Integer, primary_key=True, index=True)
-    document_id = Column(Integer, ForeignKey("documents.id"), nullable=False, index=True)
-    page_number = Column(Integer, nullable=False)
-    content = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    grade_id = Column(Integer, ForeignKey("grades.id"), nullable=False, index=True)
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False, index=True)
+    
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    part = Column(String(50), nullable=True)  # e.g., "Part 1", "Part 2"
+    google_drive_id = Column(String(255), nullable=False)  # Google Drive file ID
+    google_drive_url = Column(String(500), nullable=True)  # Shareable Google Drive URL
+    
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_public = Column(Boolean, default=True)
+    
+    # Relationships
+    grade = relationship("Grade", back_populates="textbooks")
+    subject = relationship("Subject", back_populates="textbooks")
     
     def __repr__(self):
-        return f"<Page(id={self.id}, document_id={self.document_id}, page={self.page_number})>"
+        return f"<Textbook(id={self.id}, title={self.title}, part={self.part})>"
+
+
+class StudyNote(Base):
+    """Study notes document model (uploaded documents for specific lessons/chapters)"""
+    __tablename__ = "study_notes_documents"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    grade_id = Column(Integer, ForeignKey("grades.id"), nullable=False, index=True)
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False, index=True)
+    
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    lesson = Column(String(255), nullable=True)  # e.g., "Chapter 5", "Lesson 3"
+    google_drive_id = Column(String(255), nullable=False)  # Google Drive file ID
+    google_drive_url = Column(String(500), nullable=True)  # Shareable Google Drive URL
+    
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_public = Column(Boolean, default=False)
+    
+    # Relationships
+    owner = relationship("User", foreign_keys=[owner_id], back_populates="study_note_documents")
+    grade = relationship("Grade", back_populates="study_notes")
+    subject = relationship("Subject", back_populates="study_notes")
+    
+    def __repr__(self):
+        return f"<StudyNote(id={self.id}, title={self.title}, owner_id={self.owner_id})>"

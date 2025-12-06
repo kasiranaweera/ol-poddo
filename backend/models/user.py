@@ -29,6 +29,8 @@ class User(Base):
     forum_comments = relationship("ForumComment", back_populates="user", cascade="all, delete-orphan")
     questions = relationship("Question", back_populates="user", cascade="all, delete-orphan")
     answers = relationship("Answer", back_populates="user", cascade="all, delete-orphan")
+    papers = relationship("Paper", back_populates="owner", cascade="all, delete-orphan")
+    study_note_documents = relationship("StudyNote", back_populates="owner", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<User(id={self.id}, username={self.username}, email={self.email})>"

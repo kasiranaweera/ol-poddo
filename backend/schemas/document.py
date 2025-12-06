@@ -3,69 +3,22 @@ from datetime import datetime
 from typing import Optional, List
 
 
-class DocumentBase(BaseModel):
-    """Base document schema"""
-    title: str = Field(..., min_length=1, max_length=255)
-    description: Optional[str] = Field(None, max_length=1000)
-    is_public: bool = False
+# Grade Schemas
+class GradeBase(BaseModel):
+    """Base grade schema"""
+    name: str = Field(..., min_length=1, max_length=50)
+    level: int = Field(..., ge=1, le=100)
+    description: Optional[str] = Field(None, max_length=255)
 
 
-class DocumentCreate(DocumentBase):
-    """Schema for creating a document"""
+class GradeCreate(GradeBase):
+    """Schema for creating a grade"""
     pass
 
 
-class DocumentUpdate(BaseModel):
-    """Schema for updating a document"""
-    title: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = Field(None, max_length=1000)
-    is_public: Optional[bool] = None
-
-
-class DocumentResponse(DocumentBase):
-    """Schema for document response"""
+class GradeResponse(GradeBase):
+    """Schema for grade response"""
     id: int
-    user_id: int
-    filename: str
-    file_path: str
-    file_type: str
-    file_size: float
-    mime_type: str
-    document_type: str
-    uploaded_at: datetime
-    updated_at: datetime
-    
-    class Config:
-        from_attributes = True
-
-
-class DocumentListResponse(BaseModel):
-    """Schema for document list response"""
-    id: int
-    title: str
-    filename: str
-    file_type: str
-    file_size: float
-    document_type: str
-    uploaded_at: datetime
-    is_public: bool
-    
-    class Config:
-        from_attributes = True
-
-
-class PageCreate(BaseModel):
-    """Schema for creating a page"""
-    page_number: int = Field(..., gt=0)
-    content: Optional[str] = None
-
-
-class PageResponse(BaseModel):
-    """Schema for page response"""
-    id: int
-    document_id: int
-    page_number: int
-    content: Optional[str]
     created_at: datetime
     updated_at: datetime
     
@@ -73,14 +26,166 @@ class PageResponse(BaseModel):
         from_attributes = True
 
 
-class FileUploadResponse(BaseModel):
-    """Schema for file upload response"""
-    filename: str
-    file_size: float
-    mime_type: str
-    message: str = "File uploaded successfully"
+# Subject Schemas
+class SubjectBase(BaseModel):
+    """Base subject schema"""
+    grade_id: int
+    name: str = Field(..., min_length=1, max_length=100)
+    code: Optional[str] = Field(None, max_length=20)
+    description: Optional[str] = Field(None, max_length=255)
 
 
-class DocumentDetailResponse(DocumentResponse):
-    """Detailed document response with all information"""
+class SubjectCreate(SubjectBase):
+    """Schema for creating a subject"""
     pass
+
+
+class SubjectResponse(SubjectBase):
+    """Schema for subject response"""
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# Paper Schemas
+class PaperBase(BaseModel):
+    """Base paper schema"""
+    title: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=1000)
+    paper_type: str = Field(..., description="Type of paper: past_paper, provisional_paper, school_paper, model_paper, other")
+    grade_id: int
+    subject_id: int
+    exam_year: Optional[int] = Field(None, ge=1900, le=2100)
+    is_public: bool = False
+
+
+class PaperCreate(PaperBase):
+    """Schema for creating a paper"""
+    pass
+
+
+class PaperResponse(PaperBase):
+    """Schema for paper response"""
+    id: int
+    owner_id: int
+    google_drive_id: str
+    google_drive_url: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class PaperListResponse(BaseModel):
+    """Schema for paper list response"""
+    id: int
+    title: str
+    paper_type: str
+    exam_year: Optional[int]
+    grade_id: int
+    subject_id: int
+    owner_id: int
+    is_public: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# Textbook Schemas
+class TextbookBase(BaseModel):
+    """Base textbook schema"""
+    title: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=1000)
+    grade_id: int
+    subject_id: int
+    part: Optional[str] = Field(None, max_length=50)
+    is_public: bool = True
+
+
+class TextbookCreate(TextbookBase):
+    """Schema for creating a textbook"""
+    pass
+
+
+class TextbookResponse(TextbookBase):
+    """Schema for textbook response"""
+    id: int
+    google_drive_id: str
+    google_drive_url: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class TextbookListResponse(BaseModel):
+    """Schema for textbook list response"""
+    id: int
+    title: str
+    part: Optional[str]
+    grade_id: int
+    subject_id: int
+    is_public: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# StudyNote Schemas
+class StudyNoteBase(BaseModel):
+    """Base study note schema"""
+    title: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=1000)
+    grade_id: int
+    subject_id: int
+    lesson: Optional[str] = Field(None, max_length=255)
+    is_public: bool = False
+
+
+class StudyNoteCreate(StudyNoteBase):
+    """Schema for creating a study note"""
+    pass
+
+
+class StudyNoteResponse(StudyNoteBase):
+    """Schema for study note response"""
+    id: int
+    owner_id: int
+    google_drive_id: str
+    google_drive_url: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class StudyNoteListResponse(BaseModel):
+    """Schema for study note list response"""
+    id: int
+    title: str
+    lesson: Optional[str]
+    grade_id: int
+    subject_id: int
+    owner_id: int
+    is_public: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# File Upload Response
+class GoogleDriveUploadResponse(BaseModel):
+    """Schema for Google Drive upload response"""
+    file_id: str
+    filename: str
+    google_drive_url: str
+    message: str = "File uploaded successfully to Google Drive"

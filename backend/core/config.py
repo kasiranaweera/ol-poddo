@@ -39,6 +39,19 @@ class Settings:
     smtp_port: int = int(os.getenv("SMTP_PORT", 587))
     smtp_user: str = os.getenv("SMTP_USER", "")
     smtp_password: str = os.getenv("SMTP_PASSWORD", "")
+    
+    # Google Drive settings
+    # Resolve the path relative to the backend directory
+    _backend_dir = os.path.dirname(os.path.dirname(__file__))
+    _google_key_relative = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", None)
+    google_service_account_json: str = (
+        os.path.join(_backend_dir, _google_key_relative) 
+        if _google_key_relative 
+        else None
+    )
+    google_drive_papers_folder_id: str = os.getenv("GOOGLE_DRIVE_PAPERS_FOLDER_ID", "")
+    google_drive_textbooks_folder_id: str = os.getenv("GOOGLE_DRIVE_TEXTBOOKS_FOLDER_ID", "")
+    google_drive_notes_folder_id: str = os.getenv("GOOGLE_DRIVE_NOTES_FOLDER_ID", "")
 
 
 # Create settings instance

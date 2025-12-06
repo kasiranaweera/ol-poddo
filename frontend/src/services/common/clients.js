@@ -73,8 +73,12 @@ class PrivateClient {
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`
     const headers = {
-      'Content-Type': 'application/json',
       ...options.headers,
+    }
+
+    // Only set Content-Type if body is not FormData
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json'
     }
 
     // Add authorization header
@@ -138,10 +142,16 @@ class PrivateClient {
    * POST request
    */
   post(endpoint, body, options = {}) {
+    // Handle FormData (for file uploads)
+    let requestBody = body
+    if (!(body instanceof FormData)) {
+      requestBody = JSON.stringify(body)
+    }
+    
     return this.request(endpoint, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(body),
+      body: requestBody,
     })
   }
 
