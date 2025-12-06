@@ -43,12 +43,23 @@ class Settings:
     # Google Drive settings
     # Resolve the path relative to the backend directory
     _backend_dir = os.path.dirname(os.path.dirname(__file__))
+    
+    # OAuth2 credentials (preferred - uses your personal Google account)
+    _google_oauth_relative = os.getenv("GOOGLE_OAUTH_CREDENTIALS_JSON", None)
+    google_oauth_credentials_json: str = (
+        os.path.join(_backend_dir, _google_oauth_relative) 
+        if _google_oauth_relative 
+        else None
+    )
+    
+    # Service Account credentials (deprecated - use OAuth2 instead)
     _google_key_relative = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", None)
     google_service_account_json: str = (
         os.path.join(_backend_dir, _google_key_relative) 
         if _google_key_relative 
         else None
     )
+    
     google_drive_papers_folder_id: str = os.getenv("GOOGLE_DRIVE_PAPERS_FOLDER_ID", "")
     google_drive_textbooks_folder_id: str = os.getenv("GOOGLE_DRIVE_TEXTBOOKS_FOLDER_ID", "")
     google_drive_notes_folder_id: str = os.getenv("GOOGLE_DRIVE_NOTES_FOLDER_ID", "")

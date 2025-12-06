@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from ..core.database import get_db
 from ..core.security import get_current_user
-from ..core.google_drive import get_drive_manager
+from ..core.google_drive import GoogleDriveManager
 from ..core.config import settings
 from ..models.user import User
 from ..models.grade import Grade, Subject
@@ -239,7 +239,7 @@ async def upload_paper(
             )
         
         # Upload to Google Drive (or use mock in development mode)
-        drive_manager = get_drive_manager()
+        drive_manager = GoogleDriveManager()
         filename = f"Paper_{grade.id}_{subject.id}_{datetime.utcnow().timestamp()}_{file.filename}"
         
         # Only use folder_id if it's configured and not empty
@@ -249,8 +249,8 @@ async def upload_paper(
         print(f"[upload_paper] Starting upload for: {filename}")
         print(f"[upload_paper] Folder ID: {folder_id}")
         
-        file_id, shareable_link = drive_manager.upload_file_from_bytes(
-            file_bytes=content,
+        file_id, shareable_link = await drive_manager.upload_file_from_upload(
+            file=file,
             filename=filename,
             mime_type=file.content_type,
             folder_id=folder_id,
@@ -365,7 +365,7 @@ async def delete_paper(
         
         # Delete from Google Drive
         try:
-            drive_manager = get_drive_manager()
+            drive_manager = GoogleDriveManager()
             drive_manager.delete_file(paper.google_drive_id)
         except Exception as e:
             print(f"Warning: Failed to delete from Google Drive: {str(e)}")
@@ -424,15 +424,15 @@ async def upload_textbook(
             )
         
         # Upload to Google Drive (or use mock in development mode)
-        drive_manager = get_drive_manager()
+        drive_manager = GoogleDriveManager()
         filename = f"Textbook_{grade.id}_{subject.id}_{datetime.utcnow().timestamp()}_{file.filename}"
         
         # Only use folder_id if it's configured and not empty
         folder_id = settings.google_drive_textbooks_folder_id
         folder_id = folder_id if folder_id and folder_id.strip() else None
         
-        file_id, shareable_link = drive_manager.upload_file_from_bytes(
-            file_bytes=content,
+        file_id, shareable_link = await drive_manager.upload_file_from_upload(
+            file=file,
             filename=filename,
             mime_type=file.content_type,
             folder_id=folder_id,
@@ -537,7 +537,7 @@ async def delete_textbook(
         
         # Delete from Google Drive
         try:
-            drive_manager = get_drive_manager()
+            drive_manager = GoogleDriveManager()
             drive_manager.delete_file(textbook.google_drive_id)
         except Exception as e:
             print(f"Warning: Failed to delete from Google Drive: {str(e)}")
@@ -596,15 +596,15 @@ async def upload_study_notes(
             )
         
         # Upload to Google Drive (or use mock in development mode)
-        drive_manager = get_drive_manager()
-        filename = f"Notes_{grade.id}_{subject.id}_{datetime.utcnow().timestamp()}_{file.filename}"
+        drive_manager = GoogleDriveManager()
+        filename = f"StudyNote_{chapter.id}_{datetime.utcnow().timestamp()}_{file.filename}"
         
         # Only use folder_id if it's configured and not empty
         folder_id = settings.google_drive_notes_folder_id
         folder_id = folder_id if folder_id and folder_id.strip() else None
         
-        file_id, shareable_link = drive_manager.upload_file_from_bytes(
-            file_bytes=content,
+        file_id, shareable_link = await drive_manager.upload_file_from_upload(
+            file=file,
             filename=filename,
             mime_type=file.content_type,
             folder_id=folder_id,
@@ -612,8 +612,8 @@ async def upload_study_notes(
         )
         
         # Save to database
-        db_notes = StudyNote(
-            owner_id=current_user.id,
+        db_note = StudyNote(
+            chapter_id=chapter_id,
             grade_id=grade_id,
             subject_id=subject_id,
             title=title,
@@ -710,7 +710,7 @@ async def delete_study_note(
         
         # Delete from Google Drive
         try:
-            drive_manager = get_drive_manager()
+            drive_manager = GoogleDriveManager()
             drive_manager.delete_file(note.google_drive_id)
         except Exception as e:
             print(f"Warning: Failed to delete from Google Drive: {str(e)}")

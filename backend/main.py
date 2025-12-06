@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 from .core.config import settings
 from .core.database import engine, Base
-from .routes import auth, users, resources, notes, forum, questions, documents
+from .routes import auth, users, resources, notes, forum, questions, documents, files
 from .models.user import User
 from .models.resource import Resource, ResourceCategory
 from .models.note import Note, StudyMaterial
@@ -65,6 +65,7 @@ app.include_router(notes.router)
 app.include_router(forum.router)
 app.include_router(questions.router)
 app.include_router(documents.router)
+app.include_router(files.router)
 
 
 # Root endpoint
@@ -84,7 +85,8 @@ def root():
             "notes": "/api/notes",
             "forum": "/api/forum",
             "questions": "/api/questions",
-            "documents": "/api/documents"
+            "documents": "/api/documents",
+            "files": "/api/files"
         }
     }
 

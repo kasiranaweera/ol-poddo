@@ -3,11 +3,9 @@ Google Drive integration for storing and retrieving documents
 """
 import os
 import io
+import uuid
 from typing import Optional, Tuple
-from google.auth.transport.requests import Request
-from google.oauth2.service_account import Credentials
 from google.oauth2 import service_account
-from google.oauth2.credentials import Credentials as OAuth2Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload
 from googleapiclient.errors import HttpError
@@ -16,6 +14,9 @@ from ..core.config import settings
 
 class GoogleDriveManager:
     """Manager for Google Drive operations"""
+    
+    # Scopes for Drive API access
+    SCOPES = ['https://www.googleapis.com/auth/drive']
     
     def __init__(self):
         """Initialize Google Drive manager with credentials"""
@@ -40,7 +41,7 @@ class GoogleDriveManager:
                 
                 credentials = service_account.Credentials.from_service_account_file(
                     settings.google_service_account_json,
-                    scopes=['https://www.googleapis.com/auth/drive.file']
+                    scopes=self.SCOPES
                 )
                 self.service = build('drive', 'v3', credentials=credentials)
                 print("[Google Drive] Successfully initialized with real credentials")
@@ -96,7 +97,7 @@ class GoogleDriveManager:
         description: Optional[str] = None
     ) -> Tuple[str, str]:
         """
-        Upload a file to Google Drive
+        Upload a file to Google Drive from file path
         
         Args:
             file_path: Path to the file to upload
@@ -106,14 +107,13 @@ class GoogleDriveManager:
             description: Optional file description
         
         Returns:
-            Tuple of (file_id, sharable_link)
+            Tuple of (file_id, shareable_link)
         
         Raises:
             Exception: If upload fails
         """
         # If in mock mode, return mock data
         if self.mock_mode:
-            import uuid
             file_id = str(uuid.uuid4())
             shareable_link = f"https://drive.google.com/file/d/{file_id}/view"
             print(f"[Google Drive Mock] Generated mock file ID: {file_id} for {filename}")
@@ -131,7 +131,7 @@ class GoogleDriveManager:
                 # Get the shared drive ID for this folder
                 drive_id = self._get_shared_drive_id(folder_id)
             
-            media = MediaFileUpload(file_path, mimetype=mime_type)
+            media = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
             
             if drive_id:
                 # For shared drives, use corpora parameter
@@ -165,7 +165,6 @@ class GoogleDriveManager:
             if '404' in error_msg or 'File not found' in error_msg or 'notFound' in error_msg:
                 print(f"[Google Drive] Folder not found or not accessible: {folder_id}")
                 print("[Google Drive] Switching to mock mode for this upload")
-                import uuid
                 file_id = str(uuid.uuid4())
                 shareable_link = f"https://drive.google.com/file/d/{file_id}/view"
                 print(f"[Google Drive Mock] Generated mock file ID: {file_id} for {filename}")
@@ -199,7 +198,6 @@ class GoogleDriveManager:
         """
         # If in mock mode, return mock data
         if self.mock_mode:
-            import uuid
             file_id = str(uuid.uuid4())
             shareable_link = f"https://drive.google.com/file/d/{file_id}/view"
             print(f"[Google Drive Mock] Generated mock file ID: {file_id} for {filename}")
@@ -228,7 +226,7 @@ class GoogleDriveManager:
                 print(f"[Google Drive] Uploading to root directory (no parent folder)")
             
             file_stream = io.BytesIO(file_bytes)
-            media = MediaIoBaseUpload(file_stream, mimetype=mime_type)
+            media = MediaIoBaseUpload(file_stream, mimetype=mime_type, resumable=True)
             
             print(f"[Google Drive] Starting file upload...")
             # Build create request with corpora parameter for shared drives
@@ -268,8 +266,9 @@ class GoogleDriveManager:
             if ('404' in error_msg or 'File not found' in error_msg or 'notFound' in error_msg or
                 '403' in error_msg or 'storageQuotaExceeded' in error_msg or 'Service Accounts do not have storage quota' in error_msg):
                 print(f"[Google Drive] Cannot upload to Google Drive (folder not found, no storage quota, or permission denied)")
+                print("[Google Drive] ⚠️  IMPORTANT: Service accounts can only upload to Shared Drives, not personal Drive")
+                print("[Google Drive] ℹ️  See FIX_GOOGLE_DRIVE_UPLOADS.md for setup instructions")
                 print("[Google Drive] Switching to mock mode for this upload")
-                import uuid
                 file_id = str(uuid.uuid4())
                 shareable_link = f"https://drive.google.com/file/d/{file_id}/view"
                 print(f"[Google Drive Mock] Generated mock file ID: {file_id} for {filename}")
@@ -368,8 +367,6 @@ class GoogleDriveManager:
                     body=permission,
                     fields='id',
                     supportsAllDrives=self.supports_all_drives,
-                    driveId=drive_id,
-                    corpora='drive'
                 ).execute()
             else:
                 self.service.permissions().create(
@@ -382,7 +379,6 @@ class GoogleDriveManager:
         except HttpError as error:
             # If sharing fails, continue anyway (file might already be shared)
             print(f"[Google Drive] Warning: Failed to share file {file_id}: {str(error)}")
-            pass
     
     def create_folder(self, folder_name: str, parent_folder_id: Optional[str] = None) -> str:
         """
@@ -449,6 +445,42 @@ class GoogleDriveManager:
         
         except HttpError as error:
             raise Exception(f"Failed to list files from Google Drive: {error}")
+    
+    async def upload_file_from_upload(
+        self,
+        file,
+        filename: str,
+        mime_type: str,
+        folder_id: Optional[str] = None,
+        description: Optional[str] = None
+    ) -> Tuple[str, str]:
+        """
+        Upload file from FastAPI UploadFile to Google Drive
+        
+        Args:
+            file: FastAPI UploadFile object
+            filename: Name of the file in Google Drive
+            mime_type: MIME type of the file
+            folder_id: Optional folder ID to upload to
+            description: Optional file description
+        
+        Returns:
+            Tuple of (file_id, shareable_link)
+        
+        Raises:
+            Exception: If upload fails
+        """
+        # Read file content into memory
+        file_content = await file.read()
+        
+        # Use the bytes upload method
+        return self.upload_file_from_bytes(
+            file_bytes=file_content,
+            filename=filename,
+            mime_type=mime_type,
+            folder_id=folder_id,
+            description=description
+        )
 
 
 # Global Google Drive manager instance
