@@ -111,3 +111,8 @@ class ErrorResponse(BaseModel):
     """Error response schema"""
     detail: str
     status_code: int
+
+
+class GoogleOAuthCallback(BaseModel):
+    """Schema for Google OAuth callback"""
+    code: str = Field(..., description="Authorization code from Google")

@@ -15,6 +15,7 @@ import RegisterPage from './pages/RegisterPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import AccountPage from './pages/AccountPage'
 import { VerifyEmail } from './pages/VerifyEmail'
+import GoogleAuthCallback from './pages/GoogleAuthCallback'
 
 // Protected route component
 function ProtectedRoute({ children }) {
@@ -66,6 +67,9 @@ function AppContent() {
       <Routes>
         {/* Verify email page - without header/footer */}
         <Route path="/verify" element={<VerifyEmail />} />
+        
+        {/* Google OAuth callback - without header/footer */}
+        <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
         
         {/* All other pages with header/footer layout */}
         <Route

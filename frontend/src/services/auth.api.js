@@ -146,6 +146,42 @@ export const authAPI = {
   isAuthenticated: () => {
     return privateClient.isAuthenticated()
   },
+
+  /**
+   * Google OAuth login - get authorization URL
+   */
+  getGoogleAuthUrl: async () => {
+    try {
+      const response = await publicClient.get('/auth/google/auth-url')
+      return response
+    } catch (error) {
+      throw error
+    }
+  },
+
+  /**
+   * Handle Google OAuth callback with authorization code
+   */
+  googleCallback: async (code) => {
+    try {
+      const response = await publicClient.post('/auth/google/callback', {
+        code: code,
+      })
+
+      // Store tokens and user data
+      if (response.access_token && response.refresh_token) {
+        privateClient.setTokens(response.access_token, response.refresh_token)
+        if (response.user) {
+          localStorage.setItem('user', JSON.stringify(response.user))
+        }
+      }
+
+      return response
+    } catch (error) {
+      console.error('Google callback error:', error)
+      throw error
+    }
+  },
 }
 
 export default authAPI

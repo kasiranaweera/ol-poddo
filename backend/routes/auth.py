@@ -12,6 +12,7 @@ from ..core.security import (
     get_current_user,
 )
 from ..core.email import generate_token, send_verification_email, send_password_reset_email
+from ..core.config import settings
 from ..models.user import User
 from ..models.token import VerificationToken, PasswordResetToken
 from ..schemas.user import (
@@ -22,6 +23,7 @@ from ..schemas.user import (
     MessageResponse,
     ForgotPasswordRequest,
     PasswordReset,
+    GoogleOAuthCallback,
 )
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -307,3 +309,180 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
     """Get current user's profile information"""
     return current_user
 
+
+# Google OAuth endpoints
+@router.get("/google/auth-url")
+def get_google_auth_url():
+    """
+    Get Google OAuth authorization URL for user login
+    Frontend should redirect to this URL
+    """
+    if not settings.google_oauth_client_id or not settings.google_oauth_client_secret:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google OAuth is not configured. Please set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET"
+        )
+    
+    # Google OAuth 2.0 authorization endpoint
+    google_auth_url = (
+        f"https://accounts.google.com/o/oauth2/v2/auth?"
+        f"client_id={settings.google_oauth_client_id}&"
+        f"redirect_uri={settings.google_oauth_redirect_uri}&"
+        f"response_type=code&"
+        f"scope=openid%20email%20profile&"
+        f"access_type=offline"
+    )
+    
+    return {"auth_url": google_auth_url}
+
+
+@router.post("/google/callback")
+async def google_oauth_callback(request: GoogleOAuthCallback, db: Session = Depends(get_db)):
+    """
+    Handle Google OAuth callback
+    Exchange authorization code for tokens and create/update user
+    
+    - **code**: Authorization code from Google
+    """
+    code = request.code
+    
+    if not settings.google_oauth_client_id or not settings.google_oauth_client_secret:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google OAuth is not configured"
+        )
+    
+    try:
+        import requests
+        
+        # Exchange code for tokens
+        token_url = "https://oauth2.googleapis.com/token"
+        token_data = {
+            "code": code,
+            "client_id": settings.google_oauth_client_id,
+            "client_secret": settings.google_oauth_client_secret,
+            "redirect_uri": settings.google_oauth_redirect_uri,
+            "grant_type": "authorization_code",
+        }
+        
+        print(f"\n[Google OAuth] Token Exchange Request:")
+        print(f"  URL: {token_url}")
+        print(f"  Client ID: {settings.google_oauth_client_id[:20]}...")
+        print(f"  Redirect URI: {settings.google_oauth_redirect_uri}")
+        print(f"  Code: {code[:20]}...")
+        
+        token_response = requests.post(token_url, data=token_data)
+        
+        print(f"[Google OAuth] Token Response Status: {token_response.status_code}")
+        print(f"[Google OAuth] Token Response: {token_response.text[:200]}")
+        
+        if token_response.status_code != 200:
+            error_data = token_response.json() if token_response.headers.get('content-type') == 'application/json' else {}
+            error_msg = error_data.get('error_description', token_response.text)
+            print(f"[Google OAuth] ❌ Token exchange failed: {error_msg}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Google token exchange failed: {error_msg}. Check that redirect_uri matches Google Cloud Console."
+            )
+        
+        tokens = token_response.json()
+        print(f"[Google OAuth] ✅ Successfully exchanged code for tokens")
+        
+        # Get user info from Google
+        userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+        headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+        userinfo_response = requests.get(userinfo_url, headers=headers)
+        
+        print(f"[Google OAuth] User Info Response Status: {userinfo_response.status_code}")
+        
+        if userinfo_response.status_code != 200:
+            print(f"[Google OAuth] ❌ Failed to get user info: {userinfo_response.text}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to get Google user info: {userinfo_response.text}"
+            )
+        
+        user_info = userinfo_response.json()
+        print(f"[Google OAuth] ✅ Successfully fetched user info")
+        
+        # Extract user information
+        email = user_info.get("email")
+        name = user_info.get("name", "")
+        google_id = user_info.get("id")
+        
+        print(f"[Google OAuth] User Info: email={email}, name={name}, google_id={google_id}")
+        
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Could not get email from Google account"
+            )
+        
+        print(f"[Google OAuth] Creating/updating user: {email}")
+        
+        # Find or create user
+        user = db.query(User).filter(User.email == email).first()
+        
+        if not user:
+            # Create new user from Google OAuth
+            # Generate username from email
+            username = email.split("@")[0]
+            
+            # Ensure unique username
+            counter = 1
+            base_username = username
+            while db.query(User).filter(User.username == username).first():
+                username = f"{base_username}{counter}"
+                counter += 1
+            
+            user = User(
+                username=username,
+                email=email,
+                full_name=name,
+                is_active=True,
+                is_verified=True,  # Google-verified emails are trusted
+                hashed_password=get_password_hash(google_id),  # Use google_id as password seed
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            print(f"[Google OAuth] ✅ Created new user: {username}")
+        else:
+            # Update user info if needed
+            if not user.is_verified:
+                user.is_verified = True
+            if name and not user.full_name:
+                user.full_name = name
+            user.is_active = True
+            db.commit()
+            print(f"[Google OAuth] ✅ Updated existing user: {user.username}")
+        
+        # Create tokens
+        access_token = create_access_token({"sub": user.username})
+        refresh_token = create_refresh_token({"sub": user.username})
+        
+        print(f"[Google OAuth] ✅ Successfully authenticated user: {user.username}\n")
+        
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            user=UserResponse.from_orm(user)
+        )
+        
+    except requests.RequestException as e:
+        print(f"[Google OAuth] ❌ Request error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to authenticate with Google: {str(e)}"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[Google OAuth] ❌ Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Google OAuth error: {str(e)}"
+        )

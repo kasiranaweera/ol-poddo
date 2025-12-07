@@ -63,6 +63,11 @@ class Settings:
     google_drive_papers_folder_id: str = os.getenv("GOOGLE_DRIVE_PAPERS_FOLDER_ID", "")
     google_drive_textbooks_folder_id: str = os.getenv("GOOGLE_DRIVE_TEXTBOOKS_FOLDER_ID", "")
     google_drive_notes_folder_id: str = os.getenv("GOOGLE_DRIVE_NOTES_FOLDER_ID", "")
+    
+    # Google OAuth for user authentication
+    google_oauth_client_id: str = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
+    google_oauth_client_secret: str = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
+    google_oauth_redirect_uri: str = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "http://localhost:5173/auth/google/callback")
 
 
 # Create settings instance

@@ -1,152 +1,203 @@
-import React, { useState, useEffect } from 'react'
-import { Button } from '../components/common/Button'
-import { gradeAPI, paperAPI, textbookAPI, studyNoteAPI } from '../services/document.api'
+import React, { useState, useEffect } from "react";
+import { Button } from "../components/common/Button";
+import {
+  SlidersHorizontal,
+  X,
+  Search as SearchIcon,
+  LayoutGrid,
+  LayoutList,
+} from "lucide-react";
+import {
+  gradeAPI,
+  paperAPI,
+  textbookAPI,
+  studyNoteAPI,
+} from "../services/document.api";
 
 export const Resources = () => {
-  const [activeTab, setActiveTab] = useState('papers')
-  const [activeView, setActiveView] = useState('list') // list or filter
-  const [grades, setGrades] = useState([])
-  const [subjects, setSubjects] = useState([])
-  const [papers, setPapers] = useState([])
-  const [textbooks, setTextbooks] = useState([])
-  const [notes, setNotes] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [activeTab, setActiveTab] = useState("papers");
+  const [activeView, setActiveView] = useState("list"); // list or filter
+  const [grades, setGrades] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [papers, setPapers] = useState([]);
+  const [textbooks, setTextbooks] = useState([]);
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Filter states
-  const [selectedGrade, setSelectedGrade] = useState('')
-  const [selectedSubject, setSelectedSubject] = useState('')
-  const [selectedPaperType, setSelectedPaperType] = useState('')
+  const [selectedGrade, setSelectedGrade] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedPaperType, setSelectedPaperType] = useState("");
 
   // Load grades on mount
   useEffect(() => {
-    loadGrades()
-  }, [])
+    loadGrades();
+  }, []);
 
   // Load data when tab or filters change
   useEffect(() => {
-    if (activeTab === 'papers') {
-      loadPapers()
-    } else if (activeTab === 'textbooks') {
-      loadTextbooks()
+    if (activeTab === "papers") {
+      loadPapers();
+    } else if (activeTab === "textbooks") {
+      loadTextbooks();
     } else {
-      loadNotes()
+      loadNotes();
     }
-  }, [activeTab, selectedGrade, selectedSubject, selectedPaperType])
+  }, [activeTab, selectedGrade, selectedSubject, selectedPaperType]);
 
   // Load subjects when grade changes
   useEffect(() => {
     if (selectedGrade) {
-      loadSubjects(selectedGrade)
+      loadSubjects(selectedGrade);
     } else {
-      setSubjects([])
+      setSubjects([]);
     }
-  }, [selectedGrade])
+  }, [selectedGrade]);
 
   const loadGrades = async () => {
     try {
-      const response = await gradeAPI.getAll()
-      setGrades(response || [])
+      const response = await gradeAPI.getAll();
+      setGrades(response || []);
     } catch (err) {
-      setError('Failed to load grades')
-      console.error(err)
+      setError("Failed to load grades");
+      console.error(err);
     }
-  }
+  };
 
   const loadSubjects = async (gradeId) => {
     try {
-      const response = await gradeAPI.getSubjects(gradeId)
-      setSubjects(response || [])
+      const response = await gradeAPI.getSubjects(gradeId);
+      setSubjects(response || []);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
   const loadPapers = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await paperAPI.getAll(
         selectedGrade || null,
         selectedSubject || null,
         selectedPaperType || null
-      )
-      setPapers(response || [])
+      );
+      setPapers(response || []);
     } catch (err) {
-      setError('Failed to load papers')
-      console.error(err)
+      setError("Failed to load papers");
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const loadTextbooks = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await textbookAPI.getAll(
         selectedGrade || null,
         selectedSubject || null
-      )
-      setTextbooks(response || [])
+      );
+      setTextbooks(response || []);
     } catch (err) {
-      setError('Failed to load textbooks')
-      console.error(err)
+      setError("Failed to load textbooks");
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const loadNotes = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await studyNoteAPI.getAll(
         selectedGrade || null,
         selectedSubject || null
-      )
-      setNotes(response || [])
+      );
+      setNotes(response || []);
     } catch (err) {
-      setError('Failed to load notes')
-      console.error(err)
+      setError("Failed to load notes");
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const clearFilters = () => {
-    setSelectedGrade('')
-    setSelectedSubject('')
-    setSelectedPaperType('')
-  }
+    setSelectedGrade("");
+    setSelectedSubject("");
+    setSelectedPaperType("");
+  };
+
+  const getGradeName = () => {
+    if (!selectedGrade) return "";
+    const grade = grades.find((g) => String(g.id) === String(selectedGrade));
+    return grade?.name || selectedGrade;
+  };
+
+  const getSubjectName = () => {
+    if (!selectedSubject) return "";
+    const subject = subjects.find(
+      (s) => String(s.id) === String(selectedSubject)
+    );
+    return subject?.name || selectedSubject;
+  };
+
+  const getPaperTypeName = () => {
+    if (!selectedPaperType) return "";
+    const type = paperTypes.find((t) => t.value === selectedPaperType);
+    return type?.label || selectedPaperType;
+  };
+
+  const filterDocuments = (documents) => {
+    if (!searchQuery.trim()) {
+      return documents;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return documents.filter(
+      (doc) =>
+        doc.title.toLowerCase().includes(query) ||
+        (doc.description && doc.description.toLowerCase().includes(query))
+    );
+  };
 
   const openGoogleDriveLink = (url) => {
     if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer')
+      window.open(url, "_blank", "noopener,noreferrer");
     }
-  }
+  };
 
   const paperTypes = [
-    { value: 'past_paper', label: '📜 Past Papers' },
-    { value: 'provisional_paper', label: '📋 Provisional Papers' },
-    { value: 'school_paper', label: '🏫 School Papers' },
-    { value: 'model_paper', label: '⭐ Model Papers' },
-    { value: 'other', label: '📄 Other' },
-  ]
+    { value: "past_paper", label: "📜 Past Papers" },
+    { value: "provisional_paper", label: "📋 Provisional Papers" },
+    { value: "school_paper", label: "🏫 School Papers" },
+    { value: "model_paper", label: "⭐ Model Papers" },
+    { value: "other", label: "📄 Other" },
+  ];
 
-  console.log({ papers, textbooks, notes })
+  console.log({ papers, textbooks, notes });
+  console.log({ subjects, grades, paperTypes });
 
   const DocumentCard = ({ item, type }) => (
     <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow">
       <div className="space-y-4">
         <div>
-          <h3 className="text-lg font-semibold text-foreground line-clamp-2">{item.title}</h3>
+          <h3 className="text-lg font-semibold text-foreground line-clamp-2">
+            {item.title}
+          </h3>
           {item.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-2">{item.description}</p>
+            <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
+              {item.description}
+            </p>
           )}
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {type === 'paper' && item.paper_type && (
+          {type === "paper" && item.paper_type && (
             <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-full text-xs font-medium">
-              {paperTypes.find(pt => pt.value === item.paper_type)?.label}
+              {paperTypes.find((pt) => pt.value === item.paper_type)?.label}
             </span>
           )}
           {item.exam_year && (
@@ -179,15 +230,18 @@ export const Resources = () => {
         </div>
       </div>
     </div>
-  )
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground py-12">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Learning <span className="text-amber-600 dark:text-amber-500">Resources</span>
+          <h1 className="text-4xl md:text-5xl font-bold mb-2">
+            Learning{" "}
+            <span className="text-amber-600 dark:text-amber-500">
+              Resources
+            </span>
           </h1>
           <p className="text-lg text-muted-foreground">
             Access curated study materials for your grade and subjects
@@ -202,102 +256,189 @@ export const Resources = () => {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mb-8 border-b border-border overflow-x-auto">
+        <div className="flex gap-2 mb-2 border-b border-border overflow-x-auto">
           {[
-            { id: 'papers', label: 'Papers', icon: '📄', count: papers.length },
-            { id: 'textbooks', label: 'Textbooks', icon: '📚', count: textbooks.length },
-            { id: 'notes', label: 'Study Notes', icon: '📝', count: notes.length },
-          ].map(tab => (
+            { id: "papers", label: "Papers", icon: "", count: papers.length },
+            {
+              id: "textbooks",
+              label: "Textbooks",
+              icon: "",
+              count: textbooks.length,
+            },
+            {
+              id: "notes",
+              label: "Study Notes",
+              icon: "",
+              count: notes.length,
+            },
+          ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-6 py-3 font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'border-amber-600 text-amber-600 dark:text-amber-500'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                  ? "border-amber-600 text-amber-600 dark:text-amber-500"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              {tab.icon} {tab.label} <span className="text-xs ml-2">({tab.count})</span>
+              {tab.icon} {tab.label}{" "}
+              <span className="text-xs ml-2">({tab.count})</span>
             </button>
           ))}
         </div>
+        <div className="mb-8 relative">
+          <div className="flex justify-between items-center mb-2 gap-4">
+            {/* Search Bar */}
+            <div className="relative w-full">
+              <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search by title or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-2 border border-border rounded-lg bg-background text-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-muted-foreground"
+              />
+            </div>
 
-        {/* Filter and View Toggle */}
-        <div className="flex gap-4 mb-8">
-          <Button
-            onClick={() => setActiveView(activeView === 'list' ? 'filter' : 'list')}
-            variant={activeView === 'filter' ? 'default' : 'outline'}
-            className={activeView === 'filter' ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''}
-          >
-            🔍 {activeView === 'list' ? 'Show' : 'Hide'} Filters
-          </Button>
-          {(selectedGrade || selectedSubject || selectedPaperType) && (
-            <Button onClick={clearFilters} variant="outline">
-              ✕ Clear Filters
-            </Button>
-          )}
-        </div>
+            {/* Filter and View Toggle */}
+            <div className="flex gap-4">
+              <Button
+                onClick={() =>
+                  setActiveView(activeView === "list" ? "filter" : "list")
+                }
+                variant="outline"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {activeView === "list" ? <SlidersHorizontal /> : <X />}
+              </Button>
+            </div>
+          </div>
 
-        {/* Filters */}
-        {activeView === 'filter' && (
-          <div className="bg-card border border-border rounded-lg p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Grade Filter */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Grade</label>
-                <select
-                  value={selectedGrade}
-                  onChange={(e) => setSelectedGrade(e.target.value)}
-                  className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-amber-500"
-                >
-                  <option value="">All Grades</option>
-                  {grades.map(grade => (
-                    <option key={grade.id} value={grade.id}>
-                      {grade.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Subject Filter */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Subject</label>
-                <select
-                  value={selectedSubject}
-                  onChange={(e) => setSelectedSubject(e.target.value)}
-                  disabled={!selectedGrade}
-                  className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="">All Subjects</option>
-                  {subjects.map(subject => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Paper Type Filter */}
-              {activeTab === 'papers' && (
+          {/* Filters */}
+          {activeView === "filter" && (
+            <div className="bg-card border border-border rounded-lg p-6 absolute right-0 top-12">
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                {/* Grade Filter */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Paper Type</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Grade
+                  </label>
                   <select
-                    value={selectedPaperType}
-                    onChange={(e) => setSelectedPaperType(e.target.value)}
+                    value={selectedGrade}
+                    onChange={(e) => setSelectedGrade(e.target.value)}
                     className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
-                    <option value="">All Types</option>
-                    {paperTypes.map(type => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
+                    <option value="">All Grades</option>
+                    {grades.map((grade) => (
+                      <option key={grade.id} value={grade.id}>
+                        {grade.name}
                       </option>
                     ))}
                   </select>
                 </div>
-              )}
+
+                {/* Subject Filter */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Subject
+                  </label>
+                  <select
+                    value={selectedSubject}
+                    onChange={(e) => setSelectedSubject(e.target.value)}
+                    disabled={!selectedGrade}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">All Subjects</option>
+                    {subjects.map((subject) => (
+                      <option key={subject.id} value={subject.id}>
+                        {subject.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Paper Type Filter */}
+                {activeTab === "papers" && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Paper Type
+                    </label>
+                    <select
+                      value={selectedPaperType}
+                      onChange={(e) => setSelectedPaperType(e.target.value)}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    >
+                      <option value="">All Types</option>
+                      {paperTypes.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
             </div>
+          )}
+          <div className="flex items-center justify-between">
+            <div>
+            {(selectedGrade || selectedSubject || selectedPaperType) ? (
+              <div className="flex flex-wrap gap-2">
+                {selectedGrade && (
+                  <Button
+                    onClick={() => setSelectedGrade("")}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    {getGradeName()}
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+                {selectedSubject && (
+                  <Button
+                    onClick={() => setSelectedSubject("")}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    {getSubjectName()}
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+                {selectedPaperType && (
+                  <Button
+                    onClick={() => setSelectedPaperType("")}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    {getPaperTypeName()}
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+                <Button onClick={clearFilters} variant="outline" size="sm">
+                  Clear All
+                </Button>
+              </div>
+            ):(<div className="text-muted-foreground">All Resources</div>)}
           </div>
-        )}
+          <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <LayoutList className="w-4 h-4" />
+          </Button>
+        </div></div></div>
 
         {/* Loading State */}
         {loading && (
@@ -307,33 +448,44 @@ export const Resources = () => {
         )}
 
         {/* Empty State */}
-        {!loading && ((activeTab === 'papers' && papers.length === 0) ||
-          (activeTab === 'textbooks' && textbooks.length === 0) ||
-          (activeTab === 'notes' && notes.length === 0)) && (
-          <div className="text-center py-12 bg-card border border-border rounded-lg">
-            <p className="text-lg font-medium mb-2">No resources found</p>
-            <p className="text-muted-foreground">
-              Try adjusting your filters or check back later for new materials
-            </p>
-          </div>
-        )}
+        {!loading &&
+          ((activeTab === "papers" && filterDocuments(papers).length === 0) ||
+            (activeTab === "textbooks" &&
+              filterDocuments(textbooks).length === 0) ||
+            (activeTab === "notes" && filterDocuments(notes).length === 0)) && (
+            <div className="text-center py-12 bg-card border border-border rounded-lg">
+              <p className="text-lg font-medium mb-2">No resources found</p>
+              <p className="text-muted-foreground">
+                {searchQuery
+                  ? "Try adjusting your search or filters"
+                  : "Try adjusting your filters or check back later for new materials"}
+              </p>
+            </div>
+          )}
 
         {/* Document Grid */}
         {!loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeTab === 'papers' && papers.map(paper => (
-              <DocumentCard key={paper.id} item={paper} type="paper" />
-            ))}
-            {activeTab === 'textbooks' && textbooks.map(textbook => (
-              <DocumentCard key={textbook.id} item={textbook} type="textbook" />
-            ))}
-            {activeTab === 'notes' && notes.map(note => (
-              <DocumentCard key={note.id} item={note} type="note" />
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {activeTab === "papers" &&
+              filterDocuments(papers).map((paper) => (
+                <DocumentCard key={paper.id} item={paper} type="paper" />
+              ))}
+            {activeTab === "textbooks" &&
+              filterDocuments(textbooks).map((textbook) => (
+                <DocumentCard
+                  key={textbook.id}
+                  item={textbook}
+                  type="textbook"
+                />
+              ))}
+            {activeTab === "notes" &&
+              filterDocuments(notes).map((note) => (
+                <DocumentCard key={note.id} item={note} type="note" />
+              ))}
           </div>
         )}
 
-        {/* Call to Action */}
+        {/* Call to Action
         <div className="mt-16 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-8 text-center">
           <h3 className="text-2xl font-bold mb-3 text-amber-900 dark:text-amber-100">
             Want to contribute?
@@ -342,15 +494,15 @@ export const Resources = () => {
             Share your study materials and help other students succeed
           </p>
           <Button
-            onClick={() => window.location.href = '/donate'}
+            onClick={() => (window.location.href = "/donate")}
             className="bg-amber-600 hover:bg-amber-700 text-white"
           >
             📤 Upload Your Materials
           </Button>
-        </div>
+        </div> */}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Resources
+export default Resources;
