@@ -30,7 +30,7 @@ export const Home = () => {
               OL
             </div>
             <span
-              className="hidden sm:inline text-amber-500 font-bold"
+              className="inline text-amber-500 font-bold"
               style={{
                 fontFamily: '"Gemunu Libre", sans-serif',
                 fontWeight: 800,
