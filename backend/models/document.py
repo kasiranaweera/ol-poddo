@@ -33,7 +33,7 @@ class Paper(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     paper_type = Column(Enum(PaperType), nullable=False, index=True)
-    medium = Column(Enum(Medium), nullable=False, index=True)  # Language: Sinhala, English, Tamil
+    medium = Column(Enum(Medium), nullable=True, index=True)  # Language: Sinhala, English, Tamil
     exam_year = Column(Integer, nullable=True)  # e.g., 2023, 2024
     google_drive_id = Column(String(255), nullable=False)  # Google Drive file ID
     google_drive_url = Column(String(500), nullable=True)  # Shareable Google Drive URL
@@ -61,7 +61,7 @@ class Textbook(Base):
     
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
-    medium = Column(Enum(Medium), nullable=False, index=True)  # Language: Sinhala, English, Tamil
+    medium = Column(Enum(Medium), nullable=True, index=True)  # Language: Sinhala, English, Tamil
     part = Column(String(50), nullable=True)  # e.g., "Part 1", "Part 2"
     google_drive_id = Column(String(255), nullable=False)  # Google Drive file ID
     google_drive_url = Column(String(500), nullable=True)  # Shareable Google Drive URL
@@ -89,7 +89,7 @@ class StudyNote(Base):
     
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
-    medium = Column(Enum(Medium), nullable=False, index=True)  # Language: Sinhala, English, Tamil
+    medium = Column(Enum(Medium), nullable=True, index=True)  # Language: Sinhala, English, Tamil
     lesson = Column(String(255), nullable=True)  # e.g., "Chapter 5", "Lesson 3"
     google_drive_id = Column(String(255), nullable=False)  # Google Drive file ID
     google_drive_url = Column(String(500), nullable=True)  # Shareable Google Drive URL
