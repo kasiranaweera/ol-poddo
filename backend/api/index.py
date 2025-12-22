@@ -15,8 +15,11 @@ from ..models.token import VerificationToken, PasswordResetToken
 from ..models.grade import Grade, Subject
 from ..models.document import Paper, Textbook, StudyNote
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Create database tables (only if they don't exist)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Warning: Could not create database tables: {e}")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -41,7 +44,13 @@ app.add_middleware(
 # Trusted host middleware
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["localhost", "127.0.0.1", "*.localhost"],
+    allowed_hosts=[
+        "localhost",
+        "127.0.0.1",
+        "*.localhost",
+        "ol-poddo-backend.vercel.app",
+        "*.vercel.app",
+    ],
 )
 
 # Health check endpoint
