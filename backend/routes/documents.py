@@ -14,7 +14,7 @@ from ..core.google_drive import GoogleDriveManager
 from ..core.config import settings
 from ..models.user import User
 from ..models.grade import Grade, Subject
-from ..models.document import Paper, Textbook, StudyNote, PaperType
+from ..models.document import Paper, Textbook, StudyNote, PaperType, Medium
 from ..schemas.document import (
     GradeCreate, GradeResponse, SubjectCreate, SubjectResponse,
     PaperCreate, PaperResponse, PaperListResponse,
@@ -207,6 +207,7 @@ async def upload_paper(
     grade_id: int = Form(...),
     subject_id: int = Form(...),
     paper_type: str = Form(default="other"),
+    medium: str = Form(...),
     exam_year: Optional[int] = Form(None),
     is_public: bool = Form(default=True),
     current_user: User = Depends(get_current_user),
@@ -262,6 +263,8 @@ async def upload_paper(
         # Save to database
         # Convert paper_type string to PaperType enum
         paper_type_enum = PaperType(paper_type) if isinstance(paper_type, str) else paper_type
+        # Convert medium string to Medium enum
+        medium_enum = Medium(medium) if isinstance(medium, str) else medium
         
         db_paper = Paper(
             owner_id=current_user.id,
@@ -270,6 +273,7 @@ async def upload_paper(
             title=title,
             description=description,
             paper_type=paper_type_enum,
+            medium=medium_enum,
             exam_year=exam_year,
             google_drive_id=file_id,
             google_drive_url=shareable_link,
@@ -412,6 +416,7 @@ async def upload_textbook(
     description: Optional[str] = Form(None),
     grade_id: int = Form(...),
     subject_id: int = Form(...),
+    medium: str = Form(...),
     part: Optional[str] = Form(None),
     is_public: bool = Form(default=True),
     current_user: User = Depends(get_current_user),
@@ -460,11 +465,15 @@ async def upload_textbook(
         )
         
         # Save to database
+        # Convert medium string to Medium enum
+        medium_enum = Medium(medium) if isinstance(medium, str) else medium
+        
         db_textbook = Textbook(
             grade_id=grade_id,
             subject_id=subject_id,
             title=title,
             description=description,
+            medium=medium_enum,
             part=part,
             google_drive_id=file_id,
             google_drive_url=shareable_link,
@@ -603,6 +612,7 @@ async def upload_study_notes(
     description: Optional[str] = Form(None),
     grade_id: int = Form(...),
     subject_id: int = Form(...),
+    medium: str = Form(...),
     lesson: Optional[str] = Form(None),
     is_public: bool = Form(default=True),
     current_user: User = Depends(get_current_user),
@@ -636,7 +646,7 @@ async def upload_study_notes(
         
         # Upload to Google Drive (or use mock in development mode)
         drive_manager = GoogleDriveManager()
-        filename = f"StudyNote_{chapter.id}_{datetime.utcnow().timestamp()}_{file.filename}"
+        filename = f"StudyNote_{grade.id}_{subject.id}_{datetime.utcnow().timestamp()}_{file.filename}"
         
         # Only use folder_id if it's configured and not empty
         folder_id = settings.google_drive_notes_folder_id
@@ -651,21 +661,25 @@ async def upload_study_notes(
         )
         
         # Save to database
+        # Convert medium string to Medium enum
+        medium_enum = Medium(medium) if isinstance(medium, str) else medium
+        
         db_note = StudyNote(
-            chapter_id=chapter_id,
+            owner_id=current_user.id,
             grade_id=grade_id,
             subject_id=subject_id,
             title=title,
             description=description,
+            medium=medium_enum,
             lesson=lesson,
             google_drive_id=file_id,
             google_drive_url=shareable_link,
             is_public=is_public
         )
         
-        db.add(db_notes)
+        db.add(db_note)
         db.commit()
-        db.refresh(db_notes)
+        db.refresh(db_note)
         
         return GoogleDriveUploadResponse(
             file_id=file_id,

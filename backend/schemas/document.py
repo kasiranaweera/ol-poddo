@@ -56,6 +56,7 @@ class PaperBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = Field(None, max_length=1000)
     paper_type: str = Field(..., description="Type of paper: past_paper, provisional_paper, school_paper, model_paper, other")
+    medium: str = Field(..., description="Medium/Language: sinhala, english, tamil")
     grade_id: int
     subject_id: int
     exam_year: Optional[int] = Field(None, ge=1900, le=2100)
@@ -86,6 +87,7 @@ class PaperListResponse(BaseModel):
     title: str
     description: Optional[str]
     paper_type: str
+    medium: str
     exam_year: Optional[int]
     grade_id: int
     subject_id: int
@@ -103,6 +105,7 @@ class TextbookBase(BaseModel):
     """Base textbook schema"""
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = Field(None, max_length=1000)
+    medium: str = Field(..., description="Medium/Language: sinhala, english, tamil")
     grade_id: int
     subject_id: int
     part: Optional[str] = Field(None, max_length=50)
@@ -131,6 +134,7 @@ class TextbookListResponse(BaseModel):
     id: int
     title: str
     description: Optional[str]
+    medium: str
     part: Optional[str]
     grade_id: int
     subject_id: int
@@ -147,6 +151,7 @@ class StudyNoteBase(BaseModel):
     """Base study note schema"""
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = Field(None, max_length=1000)
+    medium: str = Field(..., description="Medium/Language: sinhala, english, tamil")
     grade_id: int
     subject_id: int
     lesson: Optional[str] = Field(None, max_length=255)
@@ -176,6 +181,7 @@ class StudyNoteListResponse(BaseModel):
     id: int
     title: str
     description: Optional[str]
+    medium: str
     lesson: Optional[str]
     grade_id: int
     subject_id: int

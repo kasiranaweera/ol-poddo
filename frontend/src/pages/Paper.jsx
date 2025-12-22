@@ -96,6 +96,12 @@ export const Paper = () => {
     other: "📄 Other",
   };
 
+  const mediumTypes = {
+    sinhala: "Sinhala",
+    english: "English",
+    tamil: "Tamil",
+  };
+
   const RelatedPaperCard = ({ item }) => (
     <div
       onClick={() => navigate(`/paper/${item.id}`)}
@@ -111,6 +117,11 @@ export const Paper = () => {
         {item.paper_type && (
           <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded text-xs">
             {paperTypes[item.paper_type] || item.paper_type}
+          </span>
+        )}
+        {item.medium && (
+          <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded text-xs">
+            {mediumTypes[item.medium] || item.medium}
           </span>
         )}
       </div>
@@ -218,6 +229,11 @@ export const Paper = () => {
                     {paperTypes[paper.paper_type] || paper.paper_type}
                   </span>
                 )}
+                {paper.medium && (
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
+                    {mediumTypes[paper.medium] || paper.medium}
+                  </span>
+                )}
                 {paper.exam_year && (
                   <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
                     {paper.exam_year}
@@ -248,6 +264,16 @@ export const Paper = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Subject</p>
                       <p className="font-medium">{paper.subject}</p>
+                    </div>
+                  </div>
+                )}
+
+                {paper.medium && (
+                  <div className="flex items-start gap-3">
+                    <FileText className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Medium</p>
+                      <p className="font-medium">{mediumTypes[paper.medium] || paper.medium}</p>
                     </div>
                   </div>
                 )}
