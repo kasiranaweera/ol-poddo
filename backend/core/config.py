@@ -33,6 +33,8 @@ class Settings:
         "http://127.0.0.1",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
+        "https://ol-poddo.vercel.app",
+        "https://www.ol-poddo.vercel.app",
     ]
     
     # Email settings (for future use)

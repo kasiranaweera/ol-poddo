@@ -44,7 +44,7 @@ app.add_middleware(
 # Trusted host middleware
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["localhost", "127.0.0.1", "*.localhost"],
+    allowed_hosts=["localhost", "127.0.0.1", "*.localhost", "ol-poddo-backend.vercel.app", "*.vercel.app"],
 )
 
 
