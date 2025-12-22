@@ -2,23 +2,18 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-import sys
-from pathlib import Path
 
-# Add parent directory to path so we can import backend modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from backend.core.config import settings
-from backend.core.database import engine, Base
-from backend.routes import auth, users, resources, notes, forum, questions, documents, files
-from backend.models.user import User
-from backend.models.resource import Resource, ResourceCategory
-from backend.models.note import Note, StudyMaterial
-from backend.models.forum import ForumPost, ForumComment
-from backend.models.question import Question, Answer
-from backend.models.token import VerificationToken, PasswordResetToken
-from backend.models.grade import Grade, Subject
-from backend.models.document import Paper, Textbook, StudyNote
+from ..core.config import settings
+from ..core.database import engine, Base
+from ..routes import auth, users, resources, notes, forum, questions, documents, files
+from ..models.user import User
+from ..models.resource import Resource, ResourceCategory
+from ..models.note import Note, StudyMaterial
+from ..models.forum import ForumPost, ForumComment
+from ..models.question import Question, Answer
+from ..models.token import VerificationToken, PasswordResetToken
+from ..models.grade import Grade, Subject
+from ..models.document import Paper, Textbook, StudyNote
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
