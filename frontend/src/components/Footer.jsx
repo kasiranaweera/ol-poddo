@@ -11,7 +11,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div className="md:col-span-1">
-            <Logo />
+            <Logo height={36} width={"auto"}/>
             <p className="text-sm text-muted-foreground mt-3">
               This platform is dedicated to providing free, quality educational
               resources to all O/L students in Sri Lanka. We believe every

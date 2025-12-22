@@ -300,6 +300,26 @@ async def upload_paper(
         )
 
 
+@router.get("/papers/my", response_model=List[PaperListResponse])
+async def get_user_papers(
+    skip: int = 0,
+    limit: int = 20,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current user's papers"""
+    try:
+        papers = db.query(Paper).filter(
+            Paper.owner_id == current_user.id
+        ).order_by(Paper.created_at.desc()).offset(skip).limit(limit).all()
+        return papers
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch papers: {str(e)}"
+        )
+
+
 @router.get("/papers", response_model=List[PaperListResponse])
 async def get_papers(
     grade_id: Optional[int] = None,
@@ -501,6 +521,25 @@ async def get_textbooks(
         )
 
 
+@router.get("/textbooks/my", response_model=List[TextbookListResponse])
+async def get_user_textbooks(
+    skip: int = 0,
+    limit: int = 20,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current user's textbooks"""
+    try:
+        # Note: Textbooks don't have owner_id, returning empty list
+        textbooks = []
+        return textbooks
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch textbooks: {str(e)}"
+        )
+
+
 @router.get("/textbooks/{textbook_id}", response_model=TextbookResponse)
 async def get_textbook(textbook_id: int, db: Session = Depends(get_db)):
     """Get specific textbook"""
@@ -666,6 +705,26 @@ async def get_study_notes(
             query = query.filter(StudyNote.subject_id == subject_id)
         
         notes = query.order_by(StudyNote.created_at.desc()).offset(skip).limit(limit).all()
+        return notes
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch study notes: {str(e)}"
+        )
+
+
+@router.get("/study-notes/my", response_model=List[StudyNoteListResponse])
+async def get_user_study_notes(
+    skip: int = 0,
+    limit: int = 20,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current user's study notes"""
+    try:
+        notes = db.query(StudyNote).filter(
+            StudyNote.owner_id == current_user.id
+        ).order_by(StudyNote.created_at.desc()).offset(skip).limit(limit).all()
         return notes
     except Exception as e:
         raise HTTPException(

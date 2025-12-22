@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import studentsImage from "../assets/img-1.jpg";
+import Logo from "../components/Logo";
 
 export const Home = () => {
   const { isDark } = useTheme();
@@ -26,19 +27,7 @@ export const Home = () => {
       <section className="relative py-20 px-4 md:py-32">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-4 font-bold text-xl justify-center mb-8">
-            <div className="w-16 h-16 bg-amber-500 rounded-xl flex items-center justify-center text-white font-bold text-4xl">
-              OL
-            </div>
-            <span
-              className="inline text-amber-500 font-bold"
-              style={{
-                fontFamily: '"Gemunu Libre", sans-serif',
-                fontWeight: 800,
-                fontSize: "6rem",
-              }}
-            >
-              පොඩ්ඩෝ
-            </span>
+            <Logo height={100} width={"auto"}/>
           </div>
           <div className="text-center space-y-6 max-w-3xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold">

@@ -114,6 +114,23 @@ export const paperAPI = {
   },
 
   /**
+   * Get user's papers (uploaded by current user)
+   */
+  getUserPapers: async (skip = 0, limit = 20) => {
+    try {
+      const params = new URLSearchParams()
+      params.append('skip', skip)
+      params.append('limit', limit)
+
+      const endpoint = `/papers/my?${params.toString()}`
+      const response = await privateClient.get(endpoint)
+      return response
+    } catch (error) {
+      throw error
+    }
+  },
+
+  /**
    * Get paper types
    */
   getTypes: () => {
@@ -183,6 +200,23 @@ export const textbookAPI = {
       throw error
     }
   },
+
+  /**
+   * Get user's textbooks (uploaded by current user)
+   */
+  getUserTextbooks: async (skip = 0, limit = 20) => {
+    try {
+      const params = new URLSearchParams()
+      params.append('skip', skip)
+      params.append('limit', limit)
+
+      const endpoint = `/textbooks/my?${params.toString()}`
+      const response = await privateClient.get(endpoint)
+      return response
+    } catch (error) {
+      throw error
+    }
+  },
 }
 
 // Study Notes endpoints
@@ -236,6 +270,23 @@ export const studyNoteAPI = {
   delete: async (id) => {
     try {
       const response = await privateClient.delete(`/study-notes/${id}`)
+      return response
+    } catch (error) {
+      throw error
+    }
+  },
+
+  /**
+   * Get user's study notes (uploaded by current user)
+   */
+  getUserStudyNotes: async (skip = 0, limit = 20) => {
+    try {
+      const params = new URLSearchParams()
+      params.append('skip', skip)
+      params.append('limit', limit)
+
+      const endpoint = `/study-notes/my?${params.toString()}`
+      const response = await privateClient.get(endpoint)
       return response
     } catch (error) {
       throw error

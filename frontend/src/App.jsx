@@ -7,6 +7,8 @@ import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import { Home } from './pages/Home'
 import { Resources } from './pages/Resources'
+import { Documents } from './pages/Documents'
+import { Paper } from './pages/Paper'
 import { About } from './pages/About'
 import { Donate } from './pages/Donate'
 import { NotFound } from './pages/NotFound'
@@ -82,6 +84,8 @@ function AppContent() {
                   <Route path="/" element={<Home />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/resources" element={<Resources />} />
+                  <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+                  <Route path="/paper/:id" element={<Paper />} />
                   <Route path="/donate" element={<Donate />} />
                   
                   {/* Auth Routes */}

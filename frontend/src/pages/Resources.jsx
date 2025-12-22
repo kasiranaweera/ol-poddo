@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/common/Button";
 import {
   SlidersHorizontal,
@@ -6,6 +7,9 @@ import {
   Search as SearchIcon,
   LayoutGrid,
   LayoutList,
+  View,
+  ExternalLink,
+  Download,
 } from "lucide-react";
 import {
   gradeAPI,
@@ -15,6 +19,7 @@ import {
 } from "../services/document.api";
 
 export const Resources = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("papers");
   const [activeView, setActiveView] = useState("list"); // list or filter
   const [grades, setGrades] = useState([]);
@@ -169,6 +174,12 @@ export const Resources = () => {
     }
   };
 
+  const handleDownload = (url) => {
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
+
   const paperTypes = [
     { value: "past_paper", label: "📜 Past Papers" },
     { value: "provisional_paper", label: "📋 Provisional Papers" },
@@ -177,56 +188,96 @@ export const Resources = () => {
     { value: "other", label: "📄 Other" },
   ];
 
+  // Subject color mapping
+  const subjectColorMap = {
+    "Mathematics": "bg-red-50",
+    "English": "bg-purple-50",
+    "Science": "bg-green-50",
+    "History": "bg-stone-300",
+    "Geography": "bg-teal-300",
+    "Sinhala": "bg-rose-300",
+    "Tamil": "bg-orange-300",
+  };
+
+  const getSubjectColor = (subjectId) => {
+    if (!subjectId) return "bg-gray-50";
+    const subject = subjects.find((s) => String(s.id) === String(subjectId));
+    const subjectName = subject?.name || "";
+    return subjectColorMap[subjectName] || "bg-gray-50";
+  };
+
   console.log({ papers, textbooks, notes });
   console.log({ subjects, grades, paperTypes });
 
   const DocumentCard = ({ item, type }) => (
-    <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow">
+    <div 
+      onClick={() => navigate(`/paper/${item.id}`)}
+      className="bg-card border border-border rounded-lg p-4 hover:shadow-lg hover:border-amber-500 transition-all cursor-pointer"
+    >
       <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground line-clamp-2">
-            {item.title}
-          </h3>
-          {item.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-              {item.description}
-            </p>
-          )}
-        </div>
+        <div className={`border p-4 rounded-lg`}>
+          <div className="mb-4">
+            <h3 className="text-lg text-center font-semibold text-foreground line-clamp-2">
+              {item.title}
+            </h3>
+            {item.description && (
+              <p className="text-sm text-center text-muted-foreground line-clamp-2 mt-1">
+                {item.description}
+              </p>
+            )}
+          </div>
 
-        <div className="flex flex-wrap gap-2">
-          {type === "paper" && item.paper_type && (
-            <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-full text-xs font-medium">
-              {paperTypes.find((pt) => pt.value === item.paper_type)?.label}
-            </span>
-          )}
-          {item.exam_year && (
-            <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
-              {item.exam_year}
-            </span>
-          )}
-          {item.part && (
-            <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded-full text-xs font-medium">
-              {item.part}
-            </span>
-          )}
-          {item.lesson && (
-            <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
-              {item.lesson}
-            </span>
-          )}
+          <div className="flex flex-wrap gap-2 items-center justify-center">
+            {type === "paper" && item.paper_type && (
+              <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-full text-xs font-medium">
+                {paperTypes.find((pt) => pt.value === item.paper_type)?.label}
+              </span>
+            )}
+            {item.exam_year && (
+              <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
+                {item.exam_year}
+              </span>
+            )}
+            {item.part && (
+              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded-full text-xs font-medium">
+                {item.part}
+              </span>
+            )}
+            {item.lesson && (
+              <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
+                {item.lesson}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t border-border">
           <div className="text-xs text-muted-foreground">
             {new Date(item.created_at).toLocaleDateString()}
           </div>
+          <div className="gap-1 flex">
           <Button
-            onClick={() => openGoogleDriveLink(item.google_drive_url)}
-            className="bg-amber-600 hover:bg-amber-700 text-white text-sm"
+          variant="outline"
+          size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDownload(item.google_drive_url);
+            }}
+            className=" text-sm border text-muted-foreground rounded-lg"
           >
-            📖 View
+           <Download />
           </Button>
+          <Button
+          variant="outline"
+          size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              openGoogleDriveLink(item.google_drive_url);
+            }}
+            className=" text-sm border text-muted-foreground rounded-lg"
+          >
+             <View />
+          </Button></div>
         </div>
       </div>
     </div>
@@ -382,63 +433,67 @@ export const Resources = () => {
           )}
           <div className="flex items-center justify-between">
             <div>
-            {(selectedGrade || selectedSubject || selectedPaperType) ? (
-              <div className="flex flex-wrap gap-2">
-                {selectedGrade && (
-                  <Button
-                    onClick={() => setSelectedGrade("")}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    {getGradeName()}
-                    <X className="w-4 h-4" />
+              {selectedGrade || selectedSubject || selectedPaperType ? (
+                <div className="flex flex-wrap gap-2">
+                  {selectedGrade && (
+                    <Button
+                      onClick={() => setSelectedGrade("")}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      {getGradeName()}
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {selectedSubject && (
+                    <Button
+                      onClick={() => setSelectedSubject("")}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      {getSubjectName()}
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {selectedPaperType && (
+                    <Button
+                      onClick={() => setSelectedPaperType("")}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      {getPaperTypeName()}
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                  <Button onClick={clearFilters} variant="outline" size="sm">
+                    Clear All
                   </Button>
-                )}
-                {selectedSubject && (
-                  <Button
-                    onClick={() => setSelectedSubject("")}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    {getSubjectName()}
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
-                {selectedPaperType && (
-                  <Button
-                    onClick={() => setSelectedPaperType("")}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    {getPaperTypeName()}
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
-                <Button onClick={clearFilters} variant="outline" size="sm">
-                  Clear All
-                </Button>
-              </div>
-            ):(<div className="text-muted-foreground">All Resources</div>)}
+                </div>
+              ) : (
+                <div className="text-muted-foreground">All Resources</div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <LayoutList className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <LayoutList className="w-4 h-4" />
-          </Button>
-        </div></div></div>
+        </div>
 
         {/* Loading State */}
         {loading && (
@@ -465,7 +520,7 @@ export const Resources = () => {
 
         {/* Document Grid */}
         {!loading && (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {activeTab === "papers" &&
               filterDocuments(papers).map((paper) => (
                 <DocumentCard key={paper.id} item={paper} type="paper" />

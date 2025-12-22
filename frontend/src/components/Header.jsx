@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Flame,
   Folder,
+  FolderOpen,
   Home,
   Info,
   Key,
@@ -108,7 +109,8 @@ export const Header = () => {
 
           {/* <img src={Knowingz} alt="Knowingz Logo" className="h-8 w-auto" /> */}
           <div className="border-x-2 border-border" />
-          <Logo />
+          <Logo height={36} width={"auto"} />
+          
         </div>
 
         {/* Desktop Navigation */}
@@ -328,7 +330,7 @@ export const Header = () => {
 
       {/* Profile Menu */}
       {profileMenuOpen && (
-        <div className="border mx-4 absolute border-border right-0 rounded-lg w-4/12 md:w-3/12 xl:w-2/12 2xl:w-1/12 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60r ">
+        <div className="border mx-4 absolute border-border right-0 rounded-lg w-4/12 md:w-4/12 xl:w-3/12 2xl:w-2/12 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60r ">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-4 ">
             <div className="flex flex-col">
               <span className="text-sm font-medium">{user.username}</span>
@@ -337,6 +339,16 @@ export const Header = () => {
               </span>
             </div>
             <div className="border-t border-border" />
+            <Link
+              to="/documents"
+              className="text-sm font-medium transition-colors hover:text-primary"
+              onClick={() => setProfileMenuOpen(false)}
+            >
+              <div className="flex items-center gap-2">
+                <FolderOpen className="inline w-4" />
+                <span className="">Documents</span>
+              </div>
+            </Link>
             <Link
               to="/account"
               className="text-sm font-medium transition-colors hover:text-primary"

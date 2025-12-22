@@ -1,0 +1,27 @@
+{
+  "buildCommand": "pip install -r requirements.txt",
+  "functions": {
+    "api/index.py": {
+      "runtime": "python3.11"
+    }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.py"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "SECRET_KEY": "@secret_key",
+    "ALGORITHM": "@algorithm",
+    "ACCESS_TOKEN_EXPIRE_MINUTES": "@access_token_expire_minutes",
+    "GOOGLE_OAUTH_CLIENT_ID": "@google_oauth_client_id",
+    "GOOGLE_OAUTH_CLIENT_SECRET": "@google_oauth_client_secret",
+    "GOOGLE_DRIVE_FOLDER_ID": "@google_drive_folder_id",
+    "SMTP_HOST": "@smtp_host",
+    "SMTP_PORT": "@smtp_port",
+    "SMTP_USER": "@smtp_user",
+    "SMTP_PASSWORD": "@smtp_password"
+  }
+}
