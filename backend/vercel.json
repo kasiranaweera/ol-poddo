@@ -1,9 +1,4 @@
 {
   "buildCommand": "pip install -r requirements.txt",
-  "devCommand": "uvicorn backend.main:app --reload --host 0.0.0.0 --port 3000",
-  "functions": {
-    "api/index.py": {
-      "runtime": "python@3.12"
-    }
-  }
+  "devCommand": "uvicorn backend.main:app --reload --host 0.0.0.0 --port 3000"
 }
