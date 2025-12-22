@@ -10,10 +10,5 @@
       "src": "/(.*)",
       "dest": "backend/main.py"
     }
-  ],
-  "env": {
-    "ENVIRONMENT": "production",
-    "SECRET_KEY": "@secret_key",
-    "CORS_ORIGINS": "https://ol-poddo.vercel.app"
-  }
+  ]
 }
