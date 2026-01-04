@@ -207,25 +207,63 @@ def test():
 def load_router(module_name: str, prefix: str = None):
     """Safely load and include a router module"""
     try:
-        # Try with backend prefix first
+        # Try importing as backend.routes.{module_name} first
         try:
-            module = __import__(f"backend.routes.{module_name}", fromlist=[module_name])
-        except (ModuleNotFoundError, ImportError) as e1:
-            # Try without backend prefix (Vercel)
-            module = __import__(f"routes.{module_name}", fromlist=[module_name])
-        
-        if hasattr(module, "router"):
-            if prefix:
-                app.include_router(module.router, prefix=prefix, tags=[module_name])
+            if module_name == "auth":
+                try:
+                    from backend.routes.auth import router
+                except (ModuleNotFoundError, ImportError):
+                    from routes.auth import router
+            elif module_name == "users":
+                try:
+                    from backend.routes.users import router
+                except (ModuleNotFoundError, ImportError):
+                    from routes.users import router
+            elif module_name == "resources":
+                try:
+                    from backend.routes.resources import router
+                except (ModuleNotFoundError, ImportError):
+                    from routes.resources import router
+            elif module_name == "notes":
+                try:
+                    from backend.routes.notes import router
+                except (ModuleNotFoundError, ImportError):
+                    from routes.notes import router
+            elif module_name == "forum":
+                try:
+                    from backend.routes.forum import router
+                except (ModuleNotFoundError, ImportError):
+                    from routes.forum import router
+            elif module_name == "questions":
+                try:
+                    from backend.routes.questions import router
+                except (ModuleNotFoundError, ImportError):
+                    from routes.questions import router
+            elif module_name == "documents":
+                try:
+                    from backend.routes.documents import router
+                except (ModuleNotFoundError, ImportError):
+                    from routes.documents import router
+            elif module_name == "files":
+                try:
+                    from backend.routes.files import router
+                except (ModuleNotFoundError, ImportError):
+                    from routes.files import router
             else:
-                app.include_router(module.router, tags=[module_name])
+                print(f"✗ Unknown router module: {module_name}")
+                return False
+            
+            if prefix:
+                app.include_router(router, prefix=prefix, tags=[module_name])
+            else:
+                app.include_router(router, tags=[module_name])
             print(f"✓ Loaded router: {module_name}")
             return True
-        else:
-            print(f"✗ Module {module_name} has no 'router' attribute")
+        except ImportError as e:
+            print(f"✗ Import error loading '{module_name}': {e}")
             return False
     except Exception as e:
-        print(f"✗ Error loading router '{module_name}': {e}")
+        print(f"✗ Unexpected error loading router '{module_name}': {e}")
         import traceback
         traceback.print_exc()
         return False
