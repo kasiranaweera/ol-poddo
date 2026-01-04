@@ -3,23 +3,43 @@ from pathlib import Path
 
 # Add the parent directory to sys.path so backend is recognized as a package
 sys.path.insert(0, str(Path(__file__).parent.parent))
+# Also add current directory as fallback for edge cases
+sys.path.insert(0, str(Path(__file__).parent))
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.core.config import settings
-from backend.core.database import engine, Base
-from backend.routes import auth, users, resources, notes, forum, questions, documents, files
-from backend.models.user import User
-from backend.models.resource import Resource, ResourceCategory
-from backend.models.note import Note, StudyMaterial
-from backend.models.forum import ForumPost, ForumComment
-from backend.models.question import Question, Answer
-from backend.models.token import VerificationToken, PasswordResetToken
-from backend.models.grade import Grade, Subject
-from backend.models.document import Paper, Textbook, StudyNote
+try:
+    from backend.core.config import settings
+    from backend.core.database import engine, Base
+    from backend.routes import auth, users, resources, notes, forum, questions, documents, files
+    from backend.models.user import User
+    from backend.models.resource import Resource, ResourceCategory
+    from backend.models.note import Note, StudyMaterial
+    from backend.models.forum import ForumPost, ForumComment
+    from backend.models.question import Question, Answer
+    from backend.models.token import VerificationToken, PasswordResetToken
+    from backend.models.grade import Grade, Subject
+    from backend.models.document import Paper, Textbook, StudyNote
+except ModuleNotFoundError as e:
+    # Fallback for edge cases
+    try:
+        from core.config import settings
+        from core.database import engine, Base
+        from routes import auth, users, resources, notes, forum, questions, documents, files
+        from models.user import User
+        from models.resource import Resource, ResourceCategory
+        from models.note import Note, StudyMaterial
+        from models.forum import ForumPost, ForumComment
+        from models.question import Question, Answer
+        from models.token import VerificationToken, PasswordResetToken
+        from models.grade import Grade, Subject
+        from models.document import Paper, Textbook, StudyNote
+    except ModuleNotFoundError:
+        print(f"Import error: {e}")
+        raise
 
 # Create database tables (only if they don't exist)
 try:

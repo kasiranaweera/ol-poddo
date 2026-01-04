@@ -2,16 +2,27 @@ import sys
 from pathlib import Path
 import os
 
-# Add the parent directory to sys.path so backend is recognized as a package
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Add paths for both local development and Vercel deployment
+current_dir = Path(__file__).parent
+backend_parent = current_dir.parent  # Points to /backend in local, or /var/task in Vercel
+
+# For local development: add the project root
+sys.path.insert(0, str(backend_parent.parent))
+# For Vercel deployment: add current directory (where backend code will be copied)
+sys.path.insert(0, str(backend_parent))
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
+# Try importing with full path first (local dev), then relative (Vercel)
 try:
-    from backend.core.config import settings
+    try:
+        from backend.core.config import settings
+    except ModuleNotFoundError:
+        # Fallback for Vercel deployment where backend is in current dir
+        from core.config import settings
 except Exception as e:
     print(f"Error loading settings: {e}")
     import traceback
@@ -23,7 +34,11 @@ engine = None
 Base = None
 
 try:
-    from backend.core.database import engine, Base
+    try:
+        from backend.core.database import engine, Base
+    except ModuleNotFoundError:
+        # Fallback for Vercel deployment
+        from core.database import engine, Base
 except Exception as e:
     print(f"Warning: Could not load database module: {e}")
     import traceback
@@ -97,7 +112,11 @@ def health_check():
 
 # Include routers - lazy load them
 try:
-    from backend.routes import auth, users, resources, notes, forum, questions, documents, files
+    try:
+        from backend.routes import auth, users, resources, notes, forum, questions, documents, files
+    except ModuleNotFoundError:
+        # Fallback for Vercel deployment
+        from routes import auth, users, resources, notes, forum, questions, documents, files
     
     app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
     app.include_router(users.router, prefix="/api/users", tags=["users"])
