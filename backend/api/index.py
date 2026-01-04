@@ -292,8 +292,8 @@ def status():
     }
 
 # Minimal test endpoint for papers (direct)
-@app.get("/api/papers_test", tags=["test"])
-def papers_test():
+@app.get("/api/papers-test")
+def papers_test_endpoint():
     """Direct test endpoint for papers without router"""
     try:
         if SessionLocal is None or engine is None:
@@ -321,8 +321,8 @@ def papers_test():
         }
 
 # Minimal test endpoint for grades (direct)
-@app.get("/api/grades_test", tags=["test"])
-def grades_test():
+@app.get("/api/grades-test")
+def grades_test_endpoint():
     """Direct test endpoint for grades without router"""
     try:
         if SessionLocal is None or engine is None:
