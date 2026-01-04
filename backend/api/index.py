@@ -121,3 +121,5 @@ def root():
         "docs": "/api/docs"
     }
 
+# Export app for Vercel
+__all__ = ["app"]
