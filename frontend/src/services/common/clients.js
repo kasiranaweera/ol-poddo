@@ -3,7 +3,21 @@
  * Provides both authenticated (privateClient) and unauthenticated (publicClient) HTTP clients
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_URL_PROD || 'https://ol-poddo-backend.vercel.app/api'
+// Determine API URL based on environment
+const API_BASE_URL = (() => {
+  // Development: use VITE_API_URL
+  if (import.meta.env.DEV && import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+  // Production: use VITE_API_URL_PROD
+  if (import.meta.env.VITE_API_URL_PROD) {
+    return import.meta.env.VITE_API_URL_PROD
+  }
+  // Fallback
+  return 'https://ol-poddo-backend.vercel.app/api'
+})()
+
+console.log('[API] Base URL:', API_BASE_URL, 'Environment:', import.meta.env.MODE)
 
 /**
  * Extract error message from response

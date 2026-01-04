@@ -6,5 +6,11 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false
+  },
+  define: {
+    'import.meta.env.VITE_API_URL_PROD': JSON.stringify(
+      process.env.VITE_API_URL_PROD || 'https://ol-poddo-backend.vercel.app/api'
+    )
   }
 })
+
