@@ -70,7 +70,7 @@ class Settings:
     # Google OAuth for user authentication
     google_oauth_client_id: str = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
     google_oauth_client_secret: str = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
-    google_oauth_redirect_uri: str = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "http://localhost:5173/auth/google/callback")
+    google_oauth_redirect_uri: str = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://ol-poddo.vercel.app/auth/google/callback" if environment == "production" else "http://localhost:5173/auth/google/callback")
 
 
 # Create settings instance
