@@ -271,15 +271,24 @@ def load_router(module_name: str, prefix: str = None):
 # Load all routers
 print("Loading routers...")
 print("=" * 50)
-load_router("auth", "/api/auth")
-load_router("users", "/api/users")
-load_router("resources", "/api/resources")
-load_router("notes", "/api/notes")
-load_router("forum", "/api/forum")
-load_router("questions", "/api/questions")
-load_router("documents", "/api")
-load_router("files", "/api")
+routers_status = {}
+routers_status["auth"] = load_router("auth", "/api/auth")
+routers_status["users"] = load_router("users", "/api/users")
+routers_status["resources"] = load_router("resources", "/api/resources")
+routers_status["notes"] = load_router("notes", "/api/notes")
+routers_status["forum"] = load_router("forum", "/api/forum")
+routers_status["questions"] = load_router("questions", "/api/questions")
+routers_status["documents"] = load_router("documents", "/api")
+routers_status["files"] = load_router("files", "/api")
 print("=" * 50)
+
+# Test endpoint to show router status
+@app.get("/api/status", tags=["test"])
+def status():
+    return {
+        "message": "API status",
+        "routers": routers_status
+    }
 
 @app.get("/")
 def root():
