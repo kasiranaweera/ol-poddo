@@ -3,7 +3,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from .env file (if it exists locally)
-env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+backend_dir = os.path.dirname(os.path.dirname(__file__))
+env_path = os.path.join(backend_dir, ".env")
 if os.path.exists(env_path):
     load_dotenv(env_path)
 
@@ -16,7 +17,11 @@ class Settings:
     debug: bool = environment == "development"
     
     # Database settings
-    db_path: str = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ol_poddo.db")
+    # Use /tmp for Vercel's ephemeral filesystem in production
+    if environment == "production":
+        db_path: str = "/tmp/ol_poddo.db"
+    else:
+        db_path: str = os.path.join(backend_dir, "ol_poddo.db")
     database_url: str = f"sqlite:///{db_path}"
     
     # Security settings
@@ -46,13 +51,13 @@ class Settings:
     
     # Google Drive settings
     # Resolve the path relative to the backend directory
-    _backend_dir = os.path.dirname(os.path.dirname(__file__))
+    _backend_dir = backend_dir
     
     # OAuth2 credentials (preferred - uses your personal Google account)
     _google_oauth_relative = os.getenv("GOOGLE_OAUTH_CREDENTIALS_JSON", None)
     google_oauth_credentials_json: str = (
         os.path.join(_backend_dir, _google_oauth_relative) 
-        if _google_oauth_relative 
+        if _google_oauth_relative and os.path.exists(os.path.join(_backend_dir, _google_oauth_relative))
         else None
     )
     
@@ -60,7 +65,7 @@ class Settings:
     _google_key_relative = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", None)
     google_service_account_json: str = (
         os.path.join(_backend_dir, _google_key_relative) 
-        if _google_key_relative 
+        if _google_key_relative and os.path.exists(os.path.join(_backend_dir, _google_key_relative))
         else None
     )
     
