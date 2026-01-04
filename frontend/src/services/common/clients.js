@@ -3,7 +3,7 @@
  * Provides both authenticated (privateClient) and unauthenticated (publicClient) HTTP clients
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_URL_PROD || 'http://localhost:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_URL_PROD || 'http://localhost:8000/api' || 'https://ol-poddo-backend.vercel.app/api'
 
 /**
  * Extract error message from response
