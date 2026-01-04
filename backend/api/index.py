@@ -195,6 +195,14 @@ except Exception as e:
 def health_check():
     return {"status": "ok", "message": "OL-Poddo API is running"}
 
+# Test endpoint to debug
+@app.get("/api/test", tags=["test"])
+def test():
+    return {
+        "message": "API is working",
+        "database": "in-memory" if "memory" in (settings.database_url if engine else "none") else "file-based"
+    }
+
 # Helper function to safely import and include routers
 def load_router(module_name: str, prefix: str = None):
     """Safely load and include a router module"""
