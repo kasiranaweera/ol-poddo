@@ -58,16 +58,17 @@ except Exception as e:
 print("Attempting to load database modules...")
 engine = None
 Base = None
+SessionLocal = None
 
 try:
     try:
-        from backend.core.database import engine, Base
+        from backend.core.database import engine, Base, SessionLocal
         print("✓ Database loaded using 'backend.core.database'")
     except ModuleNotFoundError as e1:
         print(f"✗ Failed to load 'backend.core.database': {e1}")
         # Fallback for Vercel deployment
         try:
-            from core.database import engine, Base
+            from core.database import engine, Base, SessionLocal
             print("✓ Database loaded using 'core.database' (Vercel fallback)")
         except Exception as e2:
             print(f"✗ Failed to load 'core.database': {e2}")
@@ -78,6 +79,7 @@ except Exception as e:
     traceback.print_exc()
     engine = None
     Base = None
+    SessionLocal = None
 
 # Create database tables (only if they don't exist) - but don't fail if we can't
 db_initialized = False
@@ -288,6 +290,71 @@ def status():
         "routers": routers_status,
         "routes_loaded": sum(routers_status.values())
     }
+
+# Minimal test endpoint for papers (direct)
+@app.get("/api/papers_test", tags=["test"])
+def papers_test():
+    """Direct test endpoint for papers without router"""
+    try:
+        if SessionLocal is None or engine is None:
+            return {"detail": "Database not initialized"}
+        
+        db = SessionLocal()
+        try:
+            try:
+                from backend.models.document import Paper
+            except ImportError:
+                from models.document import Paper
+            
+            papers = db.query(Paper).filter(Paper.is_public == True).limit(10).all()
+            return {
+                "count": len(papers) if papers else 0,
+                "papers": papers or []
+            }
+        finally:
+            db.close()
+    except Exception as e:
+        import traceback
+        return {
+            "error": str(e),
+            "traceback": traceback.format_exc()[:500]
+        }
+
+# Minimal test endpoint for grades (direct)
+@app.get("/api/grades_test", tags=["test"])
+def grades_test():
+    """Direct test endpoint for grades without router"""
+    try:
+        if SessionLocal is None or engine is None:
+            return {"detail": "Database not initialized"}
+        
+        db = SessionLocal()
+        try:
+            try:
+                from backend.models.grade import Grade
+            except ImportError:
+                from models.grade import Grade
+            
+            grades = db.query(Grade).limit(20).all()
+            result = []
+            for g in grades:
+                result.append({
+                    "id": g.id,
+                    "name": g.name,
+                    "level": g.level
+                })
+            return {
+                "count": len(result),
+                "grades": result
+            }
+        finally:
+            db.close()
+    except Exception as e:
+        import traceback
+        return {
+            "error": str(e),
+            "traceback": traceback.format_exc()[:500]
+        }
 
 @app.get("/")
 def root():

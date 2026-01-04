@@ -1,13 +1,11 @@
 {
-  "buildCommand": "pip install -r requirements.txt && pip install -r api/requirements.txt",
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python",
+      "use": "@vercel/python@latest",
       "config": {
         "maxLambdaSize": "50mb",
-        "runtime": "python3.13",
-        "includeFiles": "core/**,models/**,routes/**,schemas/**,keys/**,.env,__init__.py,*.py"
+        "runtime": "python3.13"
       }
     }
   ],
@@ -18,3 +16,4 @@
     }
   ]
 }
+
