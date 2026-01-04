@@ -9,10 +9,6 @@ __pycache__/
 build/
 .venv/
 venv/
+backend/
 frontend/node_modules/
 frontend/dist/
-frontend/src/
-frontend/public/
-frontend/*.config.js
-frontend/*.html
-frontend/package-lock.json
