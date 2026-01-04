@@ -3,11 +3,10 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python@3.8.17",
+      "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "50mb",
-        "requestsCacheSize": "max",
-        "pythonVersion": "3.12"
+        "runtime": "python3.13"
       }
     }
   ],
@@ -16,9 +15,5 @@
       "src": "/(.*)",
       "dest": "api/index.py"
     }
-  ],
-  "env": {
-    "ENVIRONMENT": "production",
-    "DATABASE_URL": "sqlite:///:memory:"
-  }
+  ]
 }
