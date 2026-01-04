@@ -44,6 +44,55 @@ except ModuleNotFoundError as e:
 # Create database tables (only if they don't exist)
 try:
     Base.metadata.create_all(bind=engine)
+    
+    # Initialize seed data (grades and subjects)
+    try:
+        from backend.core.database import SessionLocal
+    except ModuleNotFoundError:
+        from core.database import SessionLocal
+    
+    db = SessionLocal()
+    try:
+        existing_grades = db.query(Grade).count()
+        if existing_grades == 0:
+            print("Initializing seed data...")
+            
+            # Create grades
+            grades_data = [
+                Grade(name="Grade 6", level=6, description="Grade 6"),
+                Grade(name="Grade 7", level=7, description="Grade 7"),
+                Grade(name="Grade 8", level=8, description="Grade 8"),
+                Grade(name="Grade 9", level=9, description="Grade 9"),
+                Grade(name="Grade 10", level=10, description="Grade 10"),
+                Grade(name="Grade 11", level=11, description="Grade 11 (O-Level)"),
+            ]
+            
+            for grade in grades_data:
+                db.add(grade)
+            db.commit()
+            
+            # Create subjects for each grade
+            subjects_data = [
+                {"grade_name": "Grade 11 (O-Level)", "subjects": ["Mathematics", "English", "Science", "History", "Geography"]},
+                {"grade_name": "Grade 10", "subjects": ["Mathematics", "English", "Science", "History", "Geography"]},
+                {"grade_name": "Grade 9", "subjects": ["Mathematics", "English", "Science"]},
+            ]
+            
+            for grade_info in subjects_data:
+                grade = db.query(Grade).filter(Grade.name == grade_info["grade_name"]).first()
+                if grade:
+                    for subject_name in grade_info["subjects"]:
+                        subject = Subject(name=subject_name, grade_id=grade.id)
+                        db.add(subject)
+            
+            db.commit()
+            print("Seed data initialized successfully")
+        else:
+            print(f"Database already has {existing_grades} grades, skipping seed data")
+    except Exception as e:
+        print(f"Warning: Could not initialize seed data: {e}")
+    finally:
+        db.close()
 except Exception as e:
     print(f"Warning: Could not create database tables: {e}")
 
