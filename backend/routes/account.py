@@ -12,7 +12,7 @@ from ..schemas.user import (
     MessageResponse,
 )
 
-router = APIRouter(prefix="/api/account", tags=["account"])
+router = APIRouter(tags=["account"])
 
 
 def get_current_user(

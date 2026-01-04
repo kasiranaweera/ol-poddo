@@ -65,8 +65,8 @@ app.include_router(resources.router, prefix="/api/resources", tags=["resources"]
 app.include_router(notes.router, prefix="/api/notes", tags=["notes"])
 app.include_router(forum.router, prefix="/api/forum", tags=["forum"])
 app.include_router(questions.router, prefix="/api/questions", tags=["questions"])
-app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
-app.include_router(files.router, prefix="/api/files", tags=["files"])
+app.include_router(documents.router, prefix="/api", tags=["documents"])
+app.include_router(files.router, prefix="/api", tags=["files"])
 
 @app.get("/")
 def root():

@@ -8,7 +8,7 @@ from ..core.security import get_current_user
 from ..models.user import User
 from ..models.resource import Resource, ResourceCategory, ResourceLike, ResourceComment
 
-router = APIRouter(prefix="/api/resources", tags=["resources"])
+router = APIRouter(tags=["resources"])
 
 
 @router.post("/")

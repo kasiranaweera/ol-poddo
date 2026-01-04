@@ -7,7 +7,7 @@ from ..core.security import get_current_user
 from ..models.user import User
 from ..models.question import Question, Answer
 
-router = APIRouter(prefix="/api/questions", tags=["questions"])
+router = APIRouter(tags=["questions"])
 
 
 @router.post("/")

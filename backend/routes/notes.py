@@ -7,7 +7,7 @@ from ..core.security import get_current_user
 from ..models.user import User
 from ..models.note import Note, StudyMaterial
 
-router = APIRouter(prefix="/api/notes", tags=["notes"])
+router = APIRouter(tags=["notes"])
 
 
 @router.post("/")

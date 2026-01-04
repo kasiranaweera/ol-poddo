@@ -26,7 +26,7 @@ from ..schemas.user import (
     GoogleOAuthCallback,
 )
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+router = APIRouter(tags=["auth"])
 
 
 @router.post("/register", status_code=201)

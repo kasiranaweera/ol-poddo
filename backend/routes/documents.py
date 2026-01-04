@@ -23,7 +23,7 @@ from ..schemas.document import (
     GoogleDriveUploadResponse,
 )
 
-router = APIRouter(prefix="/api", tags=["documents"])
+router = APIRouter(tags=["documents"])
 
 # Allowed file extensions and MIME types
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'txt'}

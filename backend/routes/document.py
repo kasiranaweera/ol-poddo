@@ -19,7 +19,7 @@ from ..schemas.document import (
     DocumentDetailResponse,
 )
 
-router = APIRouter(prefix="/api/documents", tags=["documents"])
+router = APIRouter(tags=["documents"])
 
 # Upload directory
 UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads"

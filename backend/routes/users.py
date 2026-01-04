@@ -7,7 +7,7 @@ from ..core.security import get_current_user
 from ..models.user import User
 from ..schemas.user import UserResponse, UserUpdate, PasswordChange
 
-router = APIRouter(prefix="/api/users", tags=["users"])
+router = APIRouter(tags=["users"])
 
 
 @router.get("/profile", response_model=UserResponse)

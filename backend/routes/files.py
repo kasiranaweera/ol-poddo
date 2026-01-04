@@ -20,7 +20,7 @@ from ..schemas.document import (
     StudyNoteResponse, StudyNoteListResponse,
 )
 
-router = APIRouter(prefix="/api/files", tags=["files"])
+router = APIRouter(tags=["files"])
 
 # File validation
 ALLOWED_PDF_MIME = {'application/pdf'}

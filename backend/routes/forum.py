@@ -7,7 +7,7 @@ from ..core.security import get_current_user
 from ..models.user import User
 from ..models.forum import ForumPost, ForumComment
 
-router = APIRouter(prefix="/api/forum", tags=["forum"])
+router = APIRouter(tags=["forum"])
 
 
 @router.post("/posts")

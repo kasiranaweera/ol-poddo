@@ -67,14 +67,14 @@ def health_check():
 
 
 # Include routers
-app.include_router(auth.router)
-app.include_router(users.router)
-app.include_router(resources.router)
-app.include_router(notes.router)
-app.include_router(forum.router)
-app.include_router(questions.router)
-app.include_router(documents.router)
-app.include_router(files.router)
+app.include_router(auth.router, prefix="/api/auth")
+app.include_router(users.router, prefix="/api/users")
+app.include_router(resources.router, prefix="/api/resources")
+app.include_router(notes.router, prefix="/api/notes")
+app.include_router(forum.router, prefix="/api/forum")
+app.include_router(questions.router, prefix="/api/questions")
+app.include_router(documents.router, prefix="/api")
+app.include_router(files.router, prefix="/api")
 
 
 # Root endpoint
