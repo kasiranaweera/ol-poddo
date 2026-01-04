@@ -10,6 +10,9 @@ export default defineConfig({
   define: {
     'import.meta.env.VITE_API_URL_PROD': JSON.stringify(
       process.env.VITE_API_URL_PROD || 'https://ol-poddo-backend.vercel.app/api'
+    ),
+    'import.meta.env.VITE_API_URL': JSON.stringify(
+      process.env.VITE_API_URL || 'https://ol-poddo-backend.vercel.app/api'
     )
   }
 })
