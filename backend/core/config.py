@@ -12,10 +12,15 @@ if os.path.exists(env_path):
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 # Determine database path based on environment
+# Note: On Vercel (production), the filesystem is ephemeral and read-only
+# Using in-memory SQLite for now - consider using PostgreSQL for real persistence
 if ENVIRONMENT == "production":
-    DB_PATH = "/tmp/ol_poddo.db"
+    # Use in-memory database on Vercel since /tmp is read-only
+    DB_PATH = "sqlite:///:memory:"
+    print("⚠️  WARNING: Using in-memory SQLite database on production. Data will not persist.")
+    print("For production, configure a cloud database (PostgreSQL, MySQL, etc.)")
 else:
-    DB_PATH = os.path.join(backend_dir, "ol_poddo.db")
+    DB_PATH = f"sqlite:///{os.path.join(backend_dir, 'ol_poddo.db')}"
 
 
 class Settings:
@@ -28,7 +33,7 @@ class Settings:
     
     # Database settings
     db_path: str = DB_PATH
-    database_url: str = f"sqlite:///{DB_PATH}"
+    database_url: str = DB_PATH
     
     # Security settings
     secret_key: str = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")

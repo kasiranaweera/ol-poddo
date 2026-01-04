@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import os
 
 # Add the parent directory to sys.path so backend is recognized as a package
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -17,21 +18,29 @@ except Exception as e:
     traceback.print_exc()
     raise
 
+# Initialize database engine and base
+engine = None
+Base = None
+
 try:
     from backend.core.database import engine, Base
 except Exception as e:
-    print(f"Error loading database: {e}")
+    print(f"Warning: Could not load database module: {e}")
     import traceback
     traceback.print_exc()
-    raise
 
-# Create database tables (only if they don't exist)
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"Warning: Could not create database tables: {e}")
-    import traceback
-    traceback.print_exc()
+# Create database tables (only if they don't exist) - but don't fail if we can't
+db_initialized = False
+if engine is not None and Base is not None:
+    try:
+        Base.metadata.create_all(bind=engine)
+        db_initialized = True
+        print("Database tables created successfully")
+    except Exception as e:
+        print(f"Warning: Could not create database tables: {e}")
+        print(f"Continuing without database. This is expected on Vercel.")
+        import traceback
+        traceback.print_exc()
 
 # Initialize FastAPI app
 try:
