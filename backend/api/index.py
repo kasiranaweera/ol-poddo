@@ -206,64 +206,123 @@ def test():
 # Helper function to safely import and include routers
 def load_router(module_name: str, prefix: str = None):
     """Safely load and include a router module"""
+    print(f"  Attempting to load '{module_name}' router...")
     try:
         # Try importing as backend.routes.{module_name} first
+        router = None
+        error_details = []
+        
         try:
             if module_name == "auth":
                 try:
-                    from backend.routes.auth import router
-                except (ModuleNotFoundError, ImportError):
-                    from routes.auth import router
+                    from backend.routes.auth import router as imported_router
+                    router = imported_router
+                except (ModuleNotFoundError, ImportError) as e:
+                    error_details.append(f"backend.routes.auth: {e}")
+                    try:
+                        from routes.auth import router as imported_router
+                        router = imported_router
+                    except Exception as e2:
+                        error_details.append(f"routes.auth: {e2}")
             elif module_name == "users":
                 try:
-                    from backend.routes.users import router
-                except (ModuleNotFoundError, ImportError):
-                    from routes.users import router
+                    from backend.routes.users import router as imported_router
+                    router = imported_router
+                except (ModuleNotFoundError, ImportError) as e:
+                    error_details.append(f"backend.routes.users: {e}")
+                    try:
+                        from routes.users import router as imported_router
+                        router = imported_router
+                    except Exception as e2:
+                        error_details.append(f"routes.users: {e2}")
             elif module_name == "resources":
                 try:
-                    from backend.routes.resources import router
-                except (ModuleNotFoundError, ImportError):
-                    from routes.resources import router
+                    from backend.routes.resources import router as imported_router
+                    router = imported_router
+                except (ModuleNotFoundError, ImportError) as e:
+                    error_details.append(f"backend.routes.resources: {e}")
+                    try:
+                        from routes.resources import router as imported_router
+                        router = imported_router
+                    except Exception as e2:
+                        error_details.append(f"routes.resources: {e2}")
             elif module_name == "notes":
                 try:
-                    from backend.routes.notes import router
-                except (ModuleNotFoundError, ImportError):
-                    from routes.notes import router
+                    from backend.routes.notes import router as imported_router
+                    router = imported_router
+                except (ModuleNotFoundError, ImportError) as e:
+                    error_details.append(f"backend.routes.notes: {e}")
+                    try:
+                        from routes.notes import router as imported_router
+                        router = imported_router
+                    except Exception as e2:
+                        error_details.append(f"routes.notes: {e2}")
             elif module_name == "forum":
                 try:
-                    from backend.routes.forum import router
-                except (ModuleNotFoundError, ImportError):
-                    from routes.forum import router
+                    from backend.routes.forum import router as imported_router
+                    router = imported_router
+                except (ModuleNotFoundError, ImportError) as e:
+                    error_details.append(f"backend.routes.forum: {e}")
+                    try:
+                        from routes.forum import router as imported_router
+                        router = imported_router
+                    except Exception as e2:
+                        error_details.append(f"routes.forum: {e2}")
             elif module_name == "questions":
                 try:
-                    from backend.routes.questions import router
-                except (ModuleNotFoundError, ImportError):
-                    from routes.questions import router
+                    from backend.routes.questions import router as imported_router
+                    router = imported_router
+                except (ModuleNotFoundError, ImportError) as e:
+                    error_details.append(f"backend.routes.questions: {e}")
+                    try:
+                        from routes.questions import router as imported_router
+                        router = imported_router
+                    except Exception as e2:
+                        error_details.append(f"routes.questions: {e2}")
             elif module_name == "documents":
                 try:
-                    from backend.routes.documents import router
-                except (ModuleNotFoundError, ImportError):
-                    from routes.documents import router
+                    from backend.routes.documents import router as imported_router
+                    router = imported_router
+                except (ModuleNotFoundError, ImportError) as e:
+                    error_details.append(f"backend.routes.documents: {e}")
+                    try:
+                        from routes.documents import router as imported_router
+                        router = imported_router
+                    except Exception as e2:
+                        error_details.append(f"routes.documents: {e2}")
             elif module_name == "files":
                 try:
-                    from backend.routes.files import router
-                except (ModuleNotFoundError, ImportError):
-                    from routes.files import router
+                    from backend.routes.files import router as imported_router
+                    router = imported_router
+                except (ModuleNotFoundError, ImportError) as e:
+                    error_details.append(f"backend.routes.files: {e}")
+                    try:
+                        from routes.files import router as imported_router
+                        router = imported_router
+                    except Exception as e2:
+                        error_details.append(f"routes.files: {e2}")
             else:
-                print(f"✗ Unknown router module: {module_name}")
-                return False
+                error_details.append(f"Unknown router module: {module_name}")
             
-            if prefix:
-                app.include_router(router, prefix=prefix, tags=[module_name])
+            if router:
+                if prefix:
+                    app.include_router(router, prefix=prefix, tags=[module_name])
+                else:
+                    app.include_router(router, tags=[module_name])
+                print(f"    ✓ Loaded router: {module_name}")
+                return True
             else:
-                app.include_router(router, tags=[module_name])
-            print(f"✓ Loaded router: {module_name}")
-            return True
-        except ImportError as e:
-            print(f"✗ Import error loading '{module_name}': {e}")
+                print(f"    ✗ Failed to load '{module_name}':")
+                for detail in error_details:
+                    print(f"      - {detail}")
+                return False
+        except Exception as e:
+            print(f"    ✗ Unexpected error: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     except Exception as e:
-        print(f"✗ Unexpected error loading router '{module_name}': {e}")
+        print(f"    ✗ Critical error loading router '{module_name}': {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -281,13 +340,16 @@ routers_status["questions"] = load_router("questions", "/api/questions")
 routers_status["documents"] = load_router("documents", "/api")
 routers_status["files"] = load_router("files", "/api")
 print("=" * 50)
+print(f"Router Status: {routers_status}")
+print(f"Routes loaded: {sum(routers_status.values())}/{len(routers_status)}")
 
 # Test endpoint to show router status
 @app.get("/api/status", tags=["test"])
 def status():
     return {
         "message": "API status",
-        "routers": routers_status
+        "routers": routers_status,
+        "routes_loaded": sum(routers_status.values())
     }
 
 @app.get("/")
