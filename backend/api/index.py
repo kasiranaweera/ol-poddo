@@ -3,13 +3,18 @@ from pathlib import Path
 import os
 
 # Add paths for both local development and Vercel deployment
-current_dir = Path(__file__).parent
-backend_parent = current_dir.parent  # Points to /backend in local, or /var/task in Vercel
+current_dir = Path(__file__).parent  # /api
+backend_dir = current_dir.parent     # /backend
+project_root = backend_dir.parent    # /project_root
 
 # For local development: add the project root
-sys.path.insert(0, str(backend_parent.parent))
-# For Vercel deployment: add current directory (where backend code will be copied)
-sys.path.insert(0, str(backend_parent))
+sys.path.insert(0, str(project_root))
+# For Vercel deployment: add backend directory (where backend code will be copied)
+sys.path.insert(0, str(backend_dir))
+# Also add current directory as fallback
+sys.path.insert(0, str(current_dir))
+
+print(f"sys.path includes: {str(project_root)}, {str(backend_dir)}, {str(current_dir)}")
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,32 +22,50 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
 # Try importing with full path first (local dev), then relative (Vercel)
+print("Attempting to load settings...")
 try:
     try:
         from backend.core.config import settings
-    except ModuleNotFoundError:
+        print("✓ Settings loaded using 'backend.core.config'")
+    except ModuleNotFoundError as e1:
+        print(f"✗ Failed to load 'backend.core.config': {e1}")
         # Fallback for Vercel deployment where backend is in current dir
-        from core.config import settings
+        try:
+            from core.config import settings
+            print("✓ Settings loaded using 'core.config' (Vercel fallback)")
+        except Exception as e2:
+            print(f"✗ Failed to load 'core.config': {e2}")
+            raise
 except Exception as e:
-    print(f"Error loading settings: {e}")
+    print(f"❌ CRITICAL: Error loading settings: {e}")
     import traceback
     traceback.print_exc()
     raise
 
 # Initialize database engine and base
+print("Attempting to load database modules...")
 engine = None
 Base = None
 
 try:
     try:
         from backend.core.database import engine, Base
-    except ModuleNotFoundError:
+        print("✓ Database loaded using 'backend.core.database'")
+    except ModuleNotFoundError as e1:
+        print(f"✗ Failed to load 'backend.core.database': {e1}")
         # Fallback for Vercel deployment
-        from core.database import engine, Base
+        try:
+            from core.database import engine, Base
+            print("✓ Database loaded using 'core.database' (Vercel fallback)")
+        except Exception as e2:
+            print(f"✗ Failed to load 'core.database': {e2}")
+            raise
 except Exception as e:
-    print(f"Warning: Could not load database module: {e}")
+    print(f"❌ Error loading database module: {e}")
     import traceback
     traceback.print_exc()
+    engine = None
+    Base = None
 
 # Create database tables (only if they don't exist) - but don't fail if we can't
 db_initialized = False
@@ -172,27 +195,45 @@ except Exception as e:
 def health_check():
     return {"status": "ok", "message": "OL-Poddo API is running"}
 
-# Include routers - lazy load them
-try:
+# Helper function to safely import and include routers
+def load_router(module_name: str, prefix: str = None):
+    """Safely load and include a router module"""
     try:
-        from backend.routes import auth, users, resources, notes, forum, questions, documents, files
-    except ModuleNotFoundError:
-        # Fallback for Vercel deployment
-        from routes import auth, users, resources, notes, forum, questions, documents, files
-    
-    app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-    app.include_router(users.router, prefix="/api/users", tags=["users"])
-    app.include_router(resources.router, prefix="/api/resources", tags=["resources"])
-    app.include_router(notes.router, prefix="/api/notes", tags=["notes"])
-    app.include_router(forum.router, prefix="/api/forum", tags=["forum"])
-    app.include_router(questions.router, prefix="/api/questions", tags=["questions"])
-    app.include_router(documents.router, prefix="/api", tags=["documents"])
-    app.include_router(files.router, prefix="/api", tags=["files"])
-except Exception as e:
-    print(f"Error loading routes: {e}")
-    import traceback
-    traceback.print_exc()
-    # Don't raise here - allow app to run with limited endpoints
+        # Try with backend prefix first
+        try:
+            module = __import__(f"backend.routes.{module_name}", fromlist=[module_name])
+        except (ModuleNotFoundError, ImportError) as e1:
+            # Try without backend prefix (Vercel)
+            module = __import__(f"routes.{module_name}", fromlist=[module_name])
+        
+        if hasattr(module, "router"):
+            if prefix:
+                app.include_router(module.router, prefix=prefix, tags=[module_name])
+            else:
+                app.include_router(module.router, tags=[module_name])
+            print(f"✓ Loaded router: {module_name}")
+            return True
+        else:
+            print(f"✗ Module {module_name} has no 'router' attribute")
+            return False
+    except Exception as e:
+        print(f"✗ Error loading router '{module_name}': {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+# Load all routers
+print("Loading routers...")
+print("=" * 50)
+load_router("auth", "/api/auth")
+load_router("users", "/api/users")
+load_router("resources", "/api/resources")
+load_router("notes", "/api/notes")
+load_router("forum", "/api/forum")
+load_router("questions", "/api/questions")
+load_router("documents", "/api")
+load_router("files", "/api")
+print("=" * 50)
 
 @app.get("/")
 def root():
