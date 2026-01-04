@@ -8,21 +8,27 @@ env_path = os.path.join(backend_dir, ".env")
 if os.path.exists(env_path):
     load_dotenv(env_path)
 
+# Get environment
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+
+# Determine database path based on environment
+if ENVIRONMENT == "production":
+    DB_PATH = "/tmp/ol_poddo.db"
+else:
+    DB_PATH = os.path.join(backend_dir, "ol_poddo.db")
+
+
 class Settings:
     """Application settings"""
     
     # App settings
     app_name: str = "OL-Poddo API"
-    environment: str = os.getenv("ENVIRONMENT", "development")
-    debug: bool = environment == "development"
+    environment: str = ENVIRONMENT
+    debug: bool = ENVIRONMENT == "development"
     
     # Database settings
-    # Use /tmp for Vercel's ephemeral filesystem in production
-    if environment == "production":
-        db_path: str = "/tmp/ol_poddo.db"
-    else:
-        db_path: str = os.path.join(backend_dir, "ol_poddo.db")
-    database_url: str = f"sqlite:///{db_path}"
+    db_path: str = DB_PATH
+    database_url: str = f"sqlite:///{DB_PATH}"
     
     # Security settings
     secret_key: str = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
@@ -76,7 +82,10 @@ class Settings:
     # Google OAuth for user authentication
     google_oauth_client_id: str = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
     google_oauth_client_secret: str = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
-    google_oauth_redirect_uri: str = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://ol-poddo.vercel.app/auth/google/callback" if environment == "production" else "http://localhost:5173/auth/google/callback")
+    google_oauth_redirect_uri: str = os.getenv(
+        "GOOGLE_OAUTH_REDIRECT_URI", 
+        "https://ol-poddo.vercel.app/auth/google/callback" if ENVIRONMENT == "production" else "http://localhost:5173/auth/google/callback"
+    )
 
 
 # Create settings instance
